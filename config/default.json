@@ -1,6 +1,6 @@
 {
   "jwtPrivateKey": "unsecureKey",
-  "db": "mongodb://localhost/vidly",
-  "port": "3900",
-  "requiresAuth": false
+  "db": "mongodb+srv://bringmet:bringmet_axost@cluster0.84qzf.mongodb.net/bringmet?retryWrites=true&w=majority",
+  "port": "5000",
+  "requiresAuth": true
 }
