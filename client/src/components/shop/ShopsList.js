@@ -7,6 +7,7 @@ import {
   Filter,
   TextInput,
   EditButton,
+  ImageField,
 } from "react-admin";
 
 const ShopFilter = (props) => (
@@ -20,10 +21,11 @@ const ShopsList = (props) => {
   return (
     <List {...props}>
       <Datagrid>
-        <TextField source="id" />
+        {/* <TextField source="id" /> */}
         <TextField source="shopname" />
         <TextField source="commercialID" />
-        <TextField source="owner" />
+        <ImageField source="filename" title="shopname" label="Image" />
+        <TextField source="owner.firstname" label="Owner" />
         <EditButton basePath="/shops" label="" />
       </Datagrid>
     </List>

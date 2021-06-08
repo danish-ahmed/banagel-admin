@@ -2,5 +2,8 @@
   "jwtPrivateKey": "unsecureKey",
   "db": "mongodb+srv://bringmet:bringmet_axost@cluster0.84qzf.mongodb.net/bringmet?retryWrites=true&w=majority",
   "port": "5000",
-  "requiresAuth": true
+  "requiresAuth": true,
+  "GEOCODER_PROVIDER":"mapquest",
+  "GEOCODER_API_KEY":"1yfZKxZlalJgQFasWZIEfPQfwkgHpMrx"
+
 }
