@@ -24,6 +24,7 @@ router.post("/", async (req, res) => {
     message: "Enjoy your token!",
     token: token,
     user: _.pick(user, ["_id", "firstname", "email", "role"]),
+    role: user.role,
   });
 });
 

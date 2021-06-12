@@ -3,6 +3,7 @@ const auth = require("../middleware/auth");
 const admin = require("../middleware/admin");
 const { Category, validate } = require("../models/category");
 const express = require("express");
+const _ = require("lodash");
 const router = express.Router();
 
 router.get("/", async (req, res) => {
@@ -19,7 +20,7 @@ router.post("/", [auth, admin], async (req, res) => {
   res.send(category);
 });
 router.put("/:id", [auth, admin, validateObjectId], async (req, res) => {
-  const { error } = validate(req.body);
+  const { error } = validate(_.omit(req.body, ["_id", "id"]));
   if (error) return res.status(400).send(error.details[0].message);
 
   const category = await Category.findByIdAndUpdate(

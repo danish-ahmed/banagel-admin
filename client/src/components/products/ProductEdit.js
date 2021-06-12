@@ -1,8 +1,6 @@
 import React from "react";
 import { FormControl, InputLabel, Input, MenuItem } from "@material-ui/core";
 import TextField from "@material-ui/core/TextField";
-import decodeJwt from "jwt-decode";
-
 import { makeStyles } from "@material-ui/core/styles";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
@@ -10,9 +8,11 @@ import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import { Alert } from "@material-ui/lab";
 import { DropzoneArea } from "material-ui-dropzone";
-import MuiPhoneInput from "material-ui-phone-number";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 import { showNotification } from "react-admin";
 import { API_URL } from "../../config";
+import "./Product.css";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -30,24 +30,20 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function ShopEdit(props) {
-  showNotification("Shop saved Successfully");
+export default function ProductEdit(props) {
   const classes = useStyles();
   const [values, setValues] = React.useState({
-    shopname: "",
-    address: "",
-    commercialID: "",
-    phone: "",
-    owner: "",
+    name: "",
+    price: "",
     category: "",
   });
   const [files, setFiles] = React.useState();
   const [error, setError] = React.useState("");
-
   const [categories, setCategories] = React.useState([]);
+  const [description, setdescription] = React.useState();
   React.useEffect(async () => {
     // setValues({ ...values, ["owner"]: localStorage.getItem("user").id });
-    const response = await fetch(API_URL + "/categories", {
+    const response = await fetch(API_URL + "/subcategories", {
       method: "GET",
       headers: new Headers({
         Accept: "application/json",
@@ -56,23 +52,21 @@ export default function ShopEdit(props) {
     let result = await response.json();
     setCategories(result);
 
-    const shop_response = await fetch(API_URL + "/shops/" + props.id, {
+    const product_response = await fetch(API_URL + "/products/" + props.id, {
       method: "GET",
       headers: new Headers({
         Accept: "application/json",
       }),
     });
-    let shop = await shop_response.json();
-    if (shop) {
+    let product = await product_response.json();
+    if (product) {
       setValues({
-        shopname: shop.shopname,
-        address: shop.address,
-        category: shop.category.id,
-        owner: shop.owner._id,
-        commercialID: shop.commercialID,
-        filename: shop.filename,
-        phone: shop.phone,
+        name: product.name,
+        price: product.price,
+        category: product.category.id,
+        filename: product.filename,
       });
+      setdescription(product.description);
     } else {
       // ---------------
       // DONOT SHOW FORM
@@ -81,26 +75,25 @@ export default function ShopEdit(props) {
   }, []);
 
   const handleChange = (prop) => (event) => {
+    setError(null);
     setValues({ ...values, [prop]: event.target.value });
-  };
-
-  const handleChangePhone = (value) => {
-    setValues({ ...values, ["phone"]: value });
   };
   const handleChangeCategory = (event) => {
     setValues({ ...values, ["category"]: event.target.value });
   };
+
   const handleSubmit = (event) => {
+    setError(null);
+
     const formData = new FormData();
-    formData.append("shopname", values.shopname);
-    formData.append("address", values.address);
-    formData.append("commercialID", values.commercialID);
-    formData.append("owner", values.owner);
-    formData.append("phone", values.phone);
+    formData.append("name", values.name);
+    formData.append("price", values.price);
     formData.append("category", values.category);
+    formData.append("description", description);
+
     formData.append("file", files[0]);
     setError("");
-    fetch(API_URL + "/shops/" + props.id, {
+    fetch(API_URL + `/products/${props.id}`, {
       method: "PUT",
       mimeType: "multipart/form-data",
       contentType: false,
@@ -115,9 +108,9 @@ export default function ShopEdit(props) {
 
           setTimeout(function () {
             props.history.push({
-              pathname: "/shops",
+              pathname: "/products",
             });
-          }, 5000);
+          }, 500);
 
           // alert("Perfect! ");
         } else if (!res.ok) {
@@ -135,7 +128,7 @@ export default function ShopEdit(props) {
     <Card className={classes.root}>
       <CardContent>
         <Typography variant="h5" component="h2">
-          Edit Shop
+          Edit Product
         </Typography>
         <br />
         {error && (
@@ -146,75 +139,75 @@ export default function ShopEdit(props) {
         <form onSubmit={handleSubmit}>
           <FormControl fullWidth className={classes.margin}>
             <InputLabel htmlFor="standard-adornment-amount">
-              Shop Name
+              Product Name
             </InputLabel>
             <Input
-              id="shopname"
-              name="shopname"
-              value={values.shopname}
-              onChange={handleChange("shopname")}
+              id="name"
+              name="name"
+              value={values.name}
+              onChange={handleChange("name")}
             />
           </FormControl>
           <FormControl fullWidth className={classes.margin}>
-            <InputLabel htmlFor="standard-adornment-amount">Address</InputLabel>
+            <InputLabel htmlFor="standard-adornment-amount">Price</InputLabel>
             <Input
-              id="address"
-              name="address"
-              value={values.address}
-              onChange={handleChange("address")}
+              id="price"
+              name="price"
+              value={values.price}
+              type="number"
+              onChange={handleChange("price")}
             />
           </FormControl>
-          <FormControl fullWidth className={classes.margin}>
-            <InputLabel htmlFor="standard-adornment-amount">
-              Commercial ID
-            </InputLabel>
-            <Input
-              id="commercialID"
-              name="commercialID"
-              value={values.commercialID}
-              onChange={handleChange("commercialID")}
-            />
+          <FormControl class="cat-control">
+            <TextField
+              id="standard-select-category"
+              select
+              label="Select Category"
+              value={values.category}
+              onChange={handleChangeCategory}
+              helperText="Please select your category"
+            >
+              {categories.map((option) => (
+                <MenuItem key={option.id} value={option.id}>
+                  {option.name}
+                </MenuItem>
+              ))}
+            </TextField>
           </FormControl>
-          <FormControl fullWidth className={classes.margin}>
-            <MuiPhoneInput
-              defaultCountry="de"
-              regions={"europe"}
-              helperText="Please select your Phone"
-              name="phone"
-              value={values.phone}
-              onChange={handleChangePhone}
-            />
-          </FormControl>
-          <TextField
-            id="standard-select-category"
-            select
-            label="Select"
-            value={values.category}
-            onChange={handleChangeCategory}
-            helperText="Please select your currency"
-          >
-            {categories.map((option) => (
-              <MenuItem
-                key={option.id}
-                value={option.id}
-                selected={option.id === values.category}
-              >
-                {option.name}
-              </MenuItem>
-            ))}
-          </TextField>
+
           <FormControl fullWidth>
+            <label class="desc-label" htmlFor="description">
+              Description
+            </label>
+            <ReactQuill
+              theme="snow"
+              value={description}
+              name="description"
+              onChange={setdescription}
+              id="description"
+            />
+          </FormControl>
+          <FormControl fullWidth>
+            <label className="img-label" htmlFor="image">
+              Upload image
+            </label>
             <DropzoneArea
+              id="image"
               acceptedFiles={["image/*"]}
               filesLimit="1"
               dropzoneText={"Drag and drop an image here or click"}
               onChange={(files) => setFiles(files)}
-              name="filename"
+              name="image"
             />
           </FormControl>
           <FormControl>
-            <Button type="submit" variant="contained" color="primary">
-              Edit Shop
+            <Button
+              type="submit"
+              id="btn-submit"
+              variant="contained"
+              color="primary"
+            >
+              Create Product
             </Button>
           </FormControl>
         </form>

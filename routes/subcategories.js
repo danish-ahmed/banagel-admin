@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.get("/", async (req, res) => {
   const subcategory = await SubCategory.find().select("-__v").sort("name");
-  res.send(category);
+  res.send(subcategory);
 });
 router.post("/", [auth, admin], async (req, res) => {
   const { error } = validate(req.body);
@@ -57,13 +57,13 @@ router.delete("/:id", [auth, admin, validateObjectId], async (req, res) => {
 });
 
 router.get("/:id", validateObjectId, async (req, res) => {
-  const category = await Category.findById(req.params.id).select("-__v");
+  const subcategory = await SubCategory.findById(req.params.id).select("-__v");
 
-  if (!category)
+  if (!subcategory)
     return res
       .status(404)
-      .send("The category with the given ID was not found.");
+      .send("The sub category with the given ID was not found.");
 
-  res.send(category);
+  res.send(subcategory);
 });
 module.exports = router;

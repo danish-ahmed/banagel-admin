@@ -18,6 +18,7 @@ export default {
       .then((res) => {
         localStorage.setItem("token", res.token);
         localStorage.setItem("user", res.user);
+        localStorage.setItem("role", res.role);
       });
 
     // accept all username/password combinations

@@ -12,6 +12,7 @@ const shopSchema = new mongoose.Schema({
     trim: true,
     minlength: 5,
     maxlength: 255,
+    unique: true,
   },
   address: {
     type: String,
@@ -40,7 +41,7 @@ const shopSchema = new mongoose.Schema({
     type: String,
     required: true,
     minlength: 2,
-    maxlength: 20,
+    maxlength: 200,
     get: function (v) {
       return "http://localhost:5000/public/uploads/" + v;
     },
@@ -63,15 +64,22 @@ const shopSchema = new mongoose.Schema({
     type: new mongoose.Schema({
       firstname: {
         type: String,
-        required: true,
-        minlength: 5,
+        minlength: 2,
         maxlength: 50,
       },
       lastname: {
         type: String,
-        required: true,
-        minlength: 5,
+        minlength: 2,
         maxlength: 50,
+      },
+      email: {
+        type: String,
+        minlength: 5,
+        maxlength: 255,
+      },
+      isVerified: {
+        type: Boolean,
+        default: false,
       },
     }),
     required: true,
@@ -85,11 +93,6 @@ shopSchema.virtual("id").get(function () {
   return this._id.toHexString();
 });
 
-// Ensure virtual fields are serialised.
-// shopSchema.set("toJSON", {
-//   virtuals: true,
-// });
-
 const Shop = mongoose.model("Shops", shopSchema);
 
 function validateShop(shop) {
@@ -100,6 +103,7 @@ function validateShop(shop) {
     phone: Joi.string().min(2).max(20).required(),
     owner: Joi.objectId().required(),
     category: Joi.objectId().required(),
+    filename: Joi.object(),
   };
 
   return Joi.validate(shop, schema);

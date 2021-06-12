@@ -1,15 +1,14 @@
 import * as React from "react";
-import { Layout, AppBar } from "react-admin";
+import { AppBar } from "react-admin";
 import { Box, Typography } from "@material-ui/core";
-import { ToggleThemeButton } from "@react-admin/ra-preferences";
-
+import LanguageSwitcher from "./LanguageSwitcher";
 const MyAppBar = (props) => (
   <AppBar {...props}>
     <Box flex="1">
       <Typography variant="h6" id="react-admin-title"></Typography>
     </Box>
-    <ToggleThemeButton />
+    <LanguageSwitcher />
   </AppBar>
 );
-
-const MyLayout = (props) => <Layout {...props} appBar={MyAppBar} />;
+export default MyAppBar;
+// const MyLayout = (props) => <Layout {...props} appBar={MyAppBar} />;

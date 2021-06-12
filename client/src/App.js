@@ -1,38 +1,75 @@
-import { fetchUtils, Admin, Resource, ShowGuesser } from "react-admin";
-import restProvider from "ra-data-simple-rest";
+import React, { useState, useEffect } from "react";
+import "./App.css";
+import { Admin, Resource } from "react-admin";
 import MyLayout from "./components/layouts/MyLayout";
 import authProvider from "./authProvider";
-import { API_URL } from "./config";
 
 import Dashboard from "./components/dashboard/Dashboard";
 import LoginPage from "./components/auth/LoginPage";
-import ShopsList from "./components/shop/ShopsList";
+import ShopList from "./components/shop/ShopList";
+import ShopShow from "./components/shop/ShopShow";
 import ShopEdit from "./components/shop/ShopEdit";
+import ShopCreate from "./components/shop/ShopCreate";
+import myDataProvider from "./MyDataProvider";
 import CategoriesList from "./components/categories/CategoriesList";
-
-const httpClient = (url, options = {}) => {
-  if (!options.headers) {
-    options.headers = new Headers({ Accept: "application/json" });
-  }
-  options.headers.set("x-auth-token", localStorage.getItem("token"));
-  return fetchUtils.fetchJson(url, options);
-};
+import CategoriesEdit from "./components/categories/CategoriesEdit";
+import SubCategoriesList from "./components/subcategories/SubCategoriesList";
+import SubCategoriesEdit from "./components/subcategories/SubCategoriesEdit";
+import SubCategoriesCreate from "./components/subcategories/SubCategoriesCreate";
+import ProductCreate from "./components/products/ProductCreate";
+import ProductList from "./components/products/ProductList";
+import ProductEdit from "./components/products/ProductEdit";
+import i18nProvider from "./polyglotProvider";
 
 function App() {
+  const [permission, setPermissions] = useState("");
+  useEffect(() => {
+    authProvider
+      .getPermissions()
+      .then((permission) => setPermissions(permission));
+  }, "none");
+  console.log(permission);
   return (
     <Admin
       dashboard={Dashboard}
       loginPage={LoginPage}
       authProvider={authProvider}
-      dataProvider={restProvider(API_URL, httpClient)}
+      dataProvider={myDataProvider}
       layout={MyLayout}
+      i18nProvider={i18nProvider}
+      locale="en"
     >
-      <Resource name="shops" label="Shop" list={ShopsList} edit={ShopEdit} />
+      <Resource
+        name="shops"
+        label="Shop"
+        show={ShopShow}
+        list={ShopList}
+        edit={permission === "admin" ? ShopEdit : null}
+        create={permission === "admin" ? ShopCreate : null}
+      />
       <Resource
         name="categories"
         label="Categoies"
         permission={authProvider.getPermissions()}
         list={CategoriesList}
+        edit={CategoriesEdit}
+      />
+      <Resource
+        name="subcategories"
+        label="Sub Categoies"
+        permission={authProvider.getPermissions()}
+        list={SubCategoriesList}
+        create={permission === "admin" ? SubCategoriesCreate : null}
+        edit={permission === "admin" ? SubCategoriesEdit : null}
+      />
+
+      <Resource
+        name="products"
+        label="Products"
+        permission={authProvider.getPermissions()}
+        list={ProductList}
+        create={permission === "admin" ? ProductCreate : null}
+        edit={permission === "admin" ? ProductEdit : null}
       />
     </Admin>
   );

@@ -30,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function ShopEdit(props) {
+export default function ShopCreate(props) {
   showNotification("Shop saved Successfully");
   const classes = useStyles();
   const [values, setValues] = React.useState({
@@ -38,7 +38,7 @@ export default function ShopEdit(props) {
     address: "",
     commercialID: "",
     phone: "",
-    owner: "",
+    owner: decodeJwt(localStorage.getItem("token"))._id,
     category: "",
   });
   const [files, setFiles] = React.useState();
@@ -55,29 +55,6 @@ export default function ShopEdit(props) {
     });
     let result = await response.json();
     setCategories(result);
-
-    const shop_response = await fetch(API_URL + "/shops/" + props.id, {
-      method: "GET",
-      headers: new Headers({
-        Accept: "application/json",
-      }),
-    });
-    let shop = await shop_response.json();
-    if (shop) {
-      setValues({
-        shopname: shop.shopname,
-        address: shop.address,
-        category: shop.category.id,
-        owner: shop.owner._id,
-        commercialID: shop.commercialID,
-        filename: shop.filename,
-        phone: shop.phone,
-      });
-    } else {
-      // ---------------
-      // DONOT SHOW FORM
-      // ---------------
-    }
   }, []);
 
   const handleChange = (prop) => (event) => {
@@ -100,8 +77,8 @@ export default function ShopEdit(props) {
     formData.append("category", values.category);
     formData.append("file", files[0]);
     setError("");
-    fetch(API_URL + "/shops/" + props.id, {
-      method: "PUT",
+    fetch(API_URL + "/shops", {
+      method: "POST",
       mimeType: "multipart/form-data",
       contentType: false,
       body: formData,
@@ -135,7 +112,7 @@ export default function ShopEdit(props) {
     <Card className={classes.root}>
       <CardContent>
         <Typography variant="h5" component="h2">
-          Edit Shop
+          Create Shop
         </Typography>
         <br />
         {error && (
@@ -179,7 +156,7 @@ export default function ShopEdit(props) {
             <MuiPhoneInput
               defaultCountry="de"
               regions={"europe"}
-              helperText="Please select your Phone"
+              helperText="Please enter your Phone"
               name="phone"
               value={values.phone}
               onChange={handleChangePhone}
@@ -191,14 +168,10 @@ export default function ShopEdit(props) {
             label="Select"
             value={values.category}
             onChange={handleChangeCategory}
-            helperText="Please select your currency"
+            helperText="Please select your category"
           >
             {categories.map((option) => (
-              <MenuItem
-                key={option.id}
-                value={option.id}
-                selected={option.id === values.category}
-              >
+              <MenuItem key={option.id} value={option.id}>
                 {option.name}
               </MenuItem>
             ))}
@@ -214,7 +187,7 @@ export default function ShopEdit(props) {
           </FormControl>
           <FormControl>
             <Button type="submit" variant="contained" color="primary">
-              Edit Shop
+              Create Shop
             </Button>
           </FormControl>
         </form>

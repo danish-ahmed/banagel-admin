@@ -7,7 +7,6 @@ const validateObjectId = require("../middleware/validateObjectId");
 const moment = require("moment");
 const express = require("express");
 const router = express.Router();
-const range = require("express-range");
 const upload = require("../middleware/fileUpload");
 router.get("/:id", validateObjectId, async (req, res) => {
   const shop = await Shop.findById(req.params.id).select("-__v");
@@ -19,16 +18,17 @@ router.get("/:id", validateObjectId, async (req, res) => {
 });
 router.get("/", [auth], async (req, res) => {
   // Members shops
-  const filters = JSON.parse(req.query.filter);
-  if (filters) {
-    filters.shopname
-      ? (filters.shopname = "/" + filters.shopname.replace(/['"]+/g, "") + "/")
-      : null;
-  }
-  console.log(filters);
+  // const filters = JSON.parse(req.query.filter);
+  // if (filters) {
+  //   filters.shopname
+  //     ? (filters.shopname = "/" + filters.shopname.replace(/['"]+/g, "") + "/")
+  //     : null;
+  // }
+  // console.log(filters);
   if (req.user.role !== "admin") {
+    const owner = await User.findById(req.user);
     const shops = await Shop.find()
-      .where({ owner: req.user, ...filters })
+      .where({ owner: owner })
       .select("-__v")
       .sort("name");
     res.range({
@@ -39,10 +39,7 @@ router.get("/", [auth], async (req, res) => {
     res.send(shops.slice(req.range.first, req.range.last + 1));
   }
   //All Shops for admin
-  const shops = await Shop.find()
-    .where({ ...filters })
-    .select("-__v")
-    .sort("name");
+  const shops = await Shop.find().select("-__v").sort("name");
 
   //Pagination
   res.range({
@@ -64,6 +61,7 @@ router.post("/", [auth, upload], async (req, res) => {
   if (!category) return res.status(400).send("Invalid Shop Category.");
 
   const _file = req.file.filename;
+
   if (!_file) {
     res.status(400).json({
       success: false,

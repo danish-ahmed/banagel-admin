@@ -1,6 +1,5 @@
 const NodeGeocoder = require("node-geocoder");
 const config = require("config");
-console.log(config);
 const options = {
   provider: config.GEOCODER_PROVIDER,
   httpAdapter: "https",

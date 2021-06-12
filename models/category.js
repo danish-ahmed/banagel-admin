@@ -7,6 +7,7 @@ const categorySchema = new mongoose.Schema({
     required: true,
     minlength: 4,
     maxlength: 50,
+    unique: true,
   },
 });
 categorySchema.virtual("id").get(function () {

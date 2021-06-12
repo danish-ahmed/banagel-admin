@@ -14,6 +14,9 @@ const subCategorySchema = new mongoose.Schema({
     required: true,
   },
 });
+subCategorySchema.set("toJSON", {
+  virtuals: true,
+});
 
 const SubCategory = mongoose.model("SubCategory", subCategorySchema);
 

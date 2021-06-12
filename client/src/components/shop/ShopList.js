@@ -3,32 +3,26 @@ import {
   List,
   Datagrid,
   TextField,
-  DateField,
-  Filter,
-  TextInput,
   EditButton,
   ImageField,
+  ShowButton,
 } from "react-admin";
 
-const ShopFilter = (props) => (
-  <Filter {...props}>
-    <TextInput label="Search Shop Name" source="shopname" />
-    <TextInput label="Commercial Id" source="CommercialID" defaultValue="" />
-  </Filter>
-);
-
-const ShopsList = (props) => {
+const ShopList = (props) => {
   return (
     <List {...props}>
       <Datagrid>
         {/* <TextField source="id" /> */}
         <TextField source="shopname" />
         <TextField source="commercialID" />
+        <TextField source="phone" />
+        <TextField source="address" />
         <ImageField source="filename" title="shopname" label="Image" />
         <TextField source="owner.firstname" label="Owner" />
-        <EditButton basePath="/shops" label="" />
+        <EditButton basePath="/shops" label="Edit" />
+        <ShowButton basePath="/shops" label="Show" />
       </Datagrid>
     </List>
   );
 };
-export default ShopsList;
+export default ShopList;
