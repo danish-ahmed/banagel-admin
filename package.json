@@ -11,8 +11,8 @@
     "install-client": "cd client && yarn install",
     "client": "cd client && yarn start",
     "heroku-postbuild": "yarn run install-client && yarn run build",
-    "develop": "concurrently --kill-others-on-fail \"yarn run server\" \"yarn run start --prefix client\"",
-    "start": "concurrently --kill-others-on-fail \"yarn run client\" \"nodemon index.js\""
+    "develop": "concurrently \"yarn run client\" \"nodemon index.js\"",
+    "start": "nodemon index.js"
 
   },
   "keywords": [],

@@ -12,6 +12,10 @@ app.use(
     limit: 20,
   })
 );
+// if (process.env.NODE_ENV == "development") {
+app.use(express.static("client/build"));
+// }
+
 app.use("/public/", express.static("public"));
 app.use(bodyParser.urlencoded({ extended: true }));
 require("./startup/routes")(app);
