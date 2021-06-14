@@ -29,8 +29,7 @@
     "mongoose": "^5.0.2",
     "multer": "^1.4.2",
     "node-geocoder": "^3.27.0",
-    "winston": "^2.4.0",
-    "winston-mongodb": "^3.0.0"
+    "winston": "2.4.0"
   },
   "devDependencies": {
     "jest": "^22.2.2",
