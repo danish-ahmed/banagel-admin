@@ -26,9 +26,9 @@ router.get("/", [auth], async (req, res) => {
   // }
   // console.log(filters);
   if (req.user.role !== "admin") {
-    const owner = await User.findById(req.user);
+    console.log(req.user);
     const shops = await Shop.find()
-      .where({ owner: owner })
+      .where({ owner: req.user })
       .select("-__v")
       .sort("name");
     res.range({

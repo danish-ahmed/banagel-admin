@@ -1,12 +1,19 @@
 const Joi = require("joi");
 const mongoose = require("mongoose");
 const { subCategorySchema } = require("./subcategory");
-const { userSchema } = require("./user");
+// const { userSchema } = require("./user");
 const { shopSchema } = require("./shop");
 const { productSchema } = require("./product");
-const Schema = mongoose.Schema;
 
-const productSchema = new mongoose.Schema({
+const shopProductSchema = new mongoose.Schema({
+  shop: {
+    type: shopSchema,
+    required: true,
+  },
+  product: {
+    type: productSchema,
+    required: true,
+  },
   name: {
     type: String,
     required: true,
@@ -33,6 +40,11 @@ const productSchema = new mongoose.Schema({
     min: 0,
     max: 255,
   },
+  discount: {
+    type: Number,
+    min: 0,
+    max: 99,
+  },
   description: { type: String },
   createDate: {
     type: Date,
@@ -40,25 +52,28 @@ const productSchema = new mongoose.Schema({
   },
 });
 
-productSchema.set("toObject", { getters: true });
-productSchema.set("toJSON", { getters: true });
+shopProductSchema.set("toObject", { getters: true });
+shopProductSchema.set("toJSON", { getters: true });
 
-productSchema.virtual("id").get(function () {
+shopProductSchema.virtual("id").get(function () {
   return this._id.toHexString();
 });
 
 function validateProduct(product) {
   const schema = {
+    shop: Joi.objectId().required(),
+    product: Joi.objectId().required(),
     name: Joi.string().min(2).max(50).required(),
     category: Joi.objectId().required(),
     image: Joi.object(),
     price: Joi.number().min(0).required(),
     description: Joi.string(),
+    discount: Joi.number().min(0).max(99),
   };
   return Joi.validate(product, schema);
 }
 
-const Product = mongoose.model("Products", productSchema);
-exports.Product = Product;
-exports.productSchema = productSchema;
+const ShopProduct = mongoose.model("ShopProducts", shopProductSchema);
+exports.ShopProduct = ShopProduct;
+exports.shopProductSchema = shopProductSchema;
 exports.validate = validateProduct;

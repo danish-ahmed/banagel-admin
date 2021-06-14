@@ -94,7 +94,7 @@ export default function ShopCreate(props) {
             props.history.push({
               pathname: "/shops",
             });
-          }, 5000);
+          }, 500);
 
           // alert("Perfect! ");
         } else if (!res.ok) {

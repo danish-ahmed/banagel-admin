@@ -6,6 +6,7 @@ import {
   EditButton,
   ImageField,
   ShowButton,
+  CreateButton,
 } from "react-admin";
 
 const ProductList = (props) => {
@@ -20,6 +21,10 @@ const ProductList = (props) => {
         {props.permissions == "admin" && (
           <EditButton basePath="/products" label="Edit" />
         )}
+        {props.permissions == "admin" && (
+          <CreateButton basePath="/products" label="Create" />
+        )}
+
         <ShowButton basePath="/products" label="Show" />
       </Datagrid>
     </List>

@@ -64,9 +64,10 @@ export default function ProductEdit(props) {
         name: product.name,
         price: product.price,
         category: product.category.id,
-        filename: product.filename,
       });
       setdescription(product.description);
+      const file = new File([product.image], "image");
+      setFiles(file);
     } else {
       // ---------------
       // DONOT SHOW FORM

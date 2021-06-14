@@ -110,4 +110,5 @@ function validateShop(shop) {
 }
 
 exports.Shop = Shop;
+exports.shopSchema = shopSchema;
 exports.validate = validateShop;

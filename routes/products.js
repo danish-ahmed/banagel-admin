@@ -65,9 +65,9 @@ router.put("/:id", [validateObjectId, upload], async (req, res) => {
   const subcategory = await SubCategory.findById(req.body.category);
   if (!subcategory) return res.status(400).send("Invalid Category.");
 
-  const _file = req.file.filename;
+  if (req.file) {
+    const _file = req.file.filename;
 
-  if (_file) {
     let product = await Product.findByIdAndUpdate(
       req.params.id,
       {

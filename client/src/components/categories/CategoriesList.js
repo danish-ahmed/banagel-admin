@@ -7,6 +7,7 @@ import {
   Filter,
   TextInput,
   EditButton,
+  CreateButton,
 } from "react-admin";
 import authProvider from "../../authProvider";
 

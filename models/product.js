@@ -50,6 +50,7 @@ function validateProduct(product) {
     image: Joi.object(),
     price: Joi.number().min(0).required(),
     description: Joi.string(),
+    file: Joi.string(),
   };
   return Joi.validate(product, schema);
 }

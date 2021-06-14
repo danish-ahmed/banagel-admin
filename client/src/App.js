@@ -20,6 +20,8 @@ import ProductCreate from "./components/products/ProductCreate";
 import ProductList from "./components/products/ProductList";
 import ProductEdit from "./components/products/ProductEdit";
 import i18nProvider from "./polyglotProvider";
+import ShopProductCreate from "./components/shopProducts/ShopProductCreate";
+import CategoriesCreate from "./components/categories/CategoriesCreate";
 
 function App() {
   const [permission, setPermissions] = useState("");
@@ -44,7 +46,7 @@ function App() {
         label="Shop"
         show={ShopShow}
         list={ShopList}
-        edit={permission === "admin" ? ShopEdit : null}
+        edit={ShopEdit}
         create={permission === "admin" ? ShopCreate : null}
       />
       <Resource
@@ -53,6 +55,7 @@ function App() {
         permission={authProvider.getPermissions()}
         list={CategoriesList}
         edit={CategoriesEdit}
+        create={CategoriesCreate}
       />
       <Resource
         name="subcategories"
@@ -70,6 +73,14 @@ function App() {
         list={ProductList}
         create={permission === "admin" ? ProductCreate : null}
         edit={permission === "admin" ? ProductEdit : null}
+      />
+
+      <Resource
+        name="shop-products"
+        label="ShopProducts"
+        list={ProductList}
+        permission={authProvider.getPermissions()}
+        create={ShopProductCreate}
       />
     </Admin>
   );
