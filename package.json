@@ -11,7 +11,8 @@
     "install-client": "cd client && yarn install",
     "heroku-postbuild": "yarn run install-client && yarn run build",
     "develop": "concurrently --kill-others-on-fail \"yarn run server\" \"yarn run start --prefix client\"",
-    "start": "concurrently --kill-others-on-fail \"yarn run server\" \"yarn run start --prefix client\""
+    "start": "concurrently \"set PORT=5000 && yarn run server\" \"cd client set PORT=3000 && yarn start\""
+
   },
   "keywords": [],
   "author": "",
