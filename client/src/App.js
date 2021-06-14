@@ -54,8 +54,8 @@ function App() {
         label="Categoies"
         permission={authProvider.getPermissions()}
         list={CategoriesList}
-        edit={CategoriesEdit}
-        create={CategoriesCreate}
+        edit={permission === "admin" ? CategoriesEdit : null}
+        create={permission === "admin" ? CategoriesCreate : null}
       />
       <Resource
         name="subcategories"

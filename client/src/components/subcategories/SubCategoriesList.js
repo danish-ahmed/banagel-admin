@@ -4,7 +4,7 @@ import {
   Datagrid,
   TextField,
   EditButton,
-  CreateButton,
+  DeleteButton,
 } from "react-admin";
 import authProvider from "../../authProvider";
 
@@ -20,7 +20,7 @@ const SubCategoriesList = (props) => {
         )}
 
         {props.permissions == "admin" && (
-          <CreateButton basePath="/subcategories" label="Create" />
+          <DeleteButton basePath="/subcategories" label="Delete" />
         )}
       </Datagrid>
     </List>

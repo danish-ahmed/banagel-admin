@@ -26,17 +26,18 @@ router.get("/", [auth], async (req, res) => {
   // }
   // console.log(filters);
   if (req.user.role !== "admin") {
-    console.log(req.user);
     const shops = await Shop.find()
-      .where({ owner: req.user })
+      .where({ "owner._id": req.user._id })
       .select("-__v")
       .sort("name");
+
     res.range({
       first: req.range.first,
       last: req.range.last,
       length: shops.length,
     });
-    res.send(shops.slice(req.range.first, req.range.last + 1));
+
+    res.send(shops);
   }
   //All Shops for admin
   const shops = await Shop.find().select("-__v").sort("name");

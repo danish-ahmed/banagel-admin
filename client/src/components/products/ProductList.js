@@ -6,7 +6,7 @@ import {
   EditButton,
   ImageField,
   ShowButton,
-  CreateButton,
+  DeleteButton,
 } from "react-admin";
 
 const ProductList = (props) => {
@@ -22,7 +22,7 @@ const ProductList = (props) => {
           <EditButton basePath="/products" label="Edit" />
         )}
         {props.permissions == "admin" && (
-          <CreateButton basePath="/products" label="Create" />
+          <DeleteButton basePath="/products" label="Delete" />
         )}
 
         <ShowButton basePath="/products" label="Show" />

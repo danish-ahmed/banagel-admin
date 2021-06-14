@@ -8,6 +8,7 @@ import {
   TextInput,
   EditButton,
   CreateButton,
+  DeleteButton,
 } from "react-admin";
 import authProvider from "../../authProvider";
 
@@ -19,6 +20,9 @@ const CategoriesList = (props) => {
         <TextField source="name" />
         {props.permissions == "admin" && (
           <EditButton basePath="/categories" label="Edit" />
+        )}
+        {props.permissions == "admin" && (
+          <DeleteButton basePath="/categories" label="Delete" />
         )}
       </Datagrid>
     </List>
