@@ -84,7 +84,12 @@ router.post("/", [auth, upload], async (req, res) => {
     category: category,
     phone: req.body.phone,
     publishDate: moment().toJSON(),
-    filename: req.protocol + "://" + req.headers.host + _file.filename,
+    filename:
+      req.protocol +
+      "://" +
+      req.headers.host +
+      "/public/uploads/" +
+      _file.filename,
   });
   await shop.save();
 
