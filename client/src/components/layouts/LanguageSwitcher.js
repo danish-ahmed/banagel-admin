@@ -1,4 +1,5 @@
 import * as React from "react";
+import { Component } from "react";
 import Button from "@material-ui/core/Button";
 import { useLocale, useSetLocale } from "react-admin";
 
@@ -7,12 +8,11 @@ const LocaleSwitcher = () => {
   const setLocale = useSetLocale();
   return (
     <div>
-      <Button disabled={locale === "fr"} onClick={() => setLocale("fr")}>
-        EN
+      <Button disabled={locale === "de"} onClick={() => setLocale("de")}>
+        DE
       </Button>
-      /
       <Button disabled={locale === "en"} onClick={() => setLocale("en")}>
-        FR
+        EN
       </Button>
     </div>
   );

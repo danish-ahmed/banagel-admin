@@ -1,25 +1,27 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   List,
   Datagrid,
   TextField,
   EditButton,
   DeleteButton,
+  useLocale,
 } from "react-admin";
-import authProvider from "../../authProvider";
 
 const SubCategoriesList = (props) => {
+  const locale = useLocale();
+
   return (
     <List {...props}>
       <Datagrid>
         <TextField source="_id" />
-        <TextField source="category.name" label="Main Category" />
-        <TextField source="name" label="Category" />
-        {props.permissions == "admin" && (
+        <TextField source={`category.name.${locale}`} label="Main Category" />
+        <TextField source={`name.${locale}`} label="Category" />
+        {props.permissions === "admin" && (
           <EditButton basePath="/subcategories" label="Edit" />
         )}
 
-        {props.permissions == "admin" && (
+        {props.permissions === "admin" && (
           <DeleteButton basePath="/subcategories" label="Delete" />
         )}
       </Datagrid>

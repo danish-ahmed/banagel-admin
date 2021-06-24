@@ -6,7 +6,8 @@ export default function SubCategoriesCreate(props) {
   return (
     <Create {...props}>
       <SimpleForm>
-        <TextInput source="name" />
+        <TextInput source="name" label="Name in Englise" />
+        <TextInput source="name_de" label="Name in German" />
         <Categories />
       </SimpleForm>
     </Create>

@@ -2,7 +2,22 @@ const winston = require("winston");
 const express = require("express");
 const range = require("express-range");
 const config = require("config");
+const mongooseIntl = require("mongoose-intl");
+const mongoose = require("mongoose");
+mongoose.plugin(mongooseIntl, {
+  languages: ["en", "de"],
+  defaultLanguage: "en",
+});
+
 const app = express();
+app.use((req, res, next) => {
+  const language = req.header("language");
+  console.log(language);
+  if (language) {
+    console.log(mongoose.setDefaultLanguage(language));
+  }
+  next();
+});
 const bodyParser = require("body-parser");
 require("./startup/logging")();
 require("./startup/cors")(app);

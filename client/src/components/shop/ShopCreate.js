@@ -1,5 +1,11 @@
 import React from "react";
-import { FormControl, InputLabel, Input, MenuItem } from "@material-ui/core";
+import {
+  FormControl,
+  InputLabel,
+  Input,
+  MenuItem,
+  Grid,
+} from "@material-ui/core";
 import TextField from "@material-ui/core/TextField";
 import decodeJwt from "jwt-decode";
 
@@ -11,7 +17,7 @@ import Typography from "@material-ui/core/Typography";
 import { Alert } from "@material-ui/lab";
 import { DropzoneArea } from "material-ui-dropzone";
 import MuiPhoneInput from "material-ui-phone-number";
-import { showNotification } from "react-admin";
+import { showNotification, useLocale } from "react-admin";
 import { API_URL } from "../../config";
 
 const useStyles = makeStyles((theme) => ({
@@ -22,6 +28,9 @@ const useStyles = makeStyles((theme) => ({
   margin: {
     margin: theme.spacing(1),
   },
+  marginRight: {
+    marginRight: theme.spacing(1),
+  },
   withoutLabel: {
     marginTop: theme.spacing(3),
   },
@@ -31,10 +40,16 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function ShopCreate(props) {
+  const locale = useLocale();
   showNotification("Shop saved Successfully");
   const classes = useStyles();
   const [values, setValues] = React.useState({
+    email: "",
+    password: "",
+    firstname: "",
+    lastname: "",
     shopname: "",
+    shopname_de: "",
     address: "",
     commercialID: "",
     phone: "",
@@ -45,16 +60,19 @@ export default function ShopCreate(props) {
   const [error, setError] = React.useState("");
 
   const [categories, setCategories] = React.useState([]);
-  React.useEffect(async () => {
+  React.useEffect(() => {
     // setValues({ ...values, ["owner"]: localStorage.getItem("user").id });
-    const response = await fetch(API_URL + "/categories", {
-      method: "GET",
-      headers: new Headers({
-        Accept: "application/json",
-      }),
-    });
-    let result = await response.json();
-    setCategories(result);
+    async function getData() {
+      const response = await fetch(API_URL + "/categories", {
+        method: "GET",
+        headers: new Headers({
+          Accept: "application/json",
+        }),
+      });
+      let result = await response.json();
+      setCategories(result);
+    }
+    getData();
   }, []);
 
   const handleChange = (prop) => (event) => {
@@ -68,44 +86,79 @@ export default function ShopCreate(props) {
     setValues({ ...values, ["category"]: event.target.value });
   };
   const handleSubmit = (event) => {
-    const formData = new FormData();
-    formData.append("shopname", values.shopname);
-    formData.append("address", values.address);
-    formData.append("commercialID", values.commercialID);
-    formData.append("owner", values.owner);
-    formData.append("phone", values.phone);
-    formData.append("category", values.category);
-    formData.append("file", files[0]);
+    const data = {
+      firstname: values.firstname,
+      lastname: values.lastname,
+      email: values.email,
+      password: values.password,
+      phone: values.phone,
+    };
+
     setError("");
-    fetch(API_URL + "/shops", {
+    fetch(API_URL + "/users", {
       method: "POST",
-      mimeType: "multipart/form-data",
-      contentType: false,
-      body: formData,
+      body: JSON.stringify(data),
       headers: {
-        "x-auth-token": localStorage.getItem("token"),
+        Accept: "application/json",
+        "Content-Type": "application/json",
       },
     })
       .then((res) => {
         if (res.ok) {
-          showNotification("Shop saved Successfully");
-
-          setTimeout(function () {
-            props.history.push({
-              pathname: "/shops",
-            });
-          }, 500);
-
+          return res.json();
           // alert("Perfect! ");
         } else if (!res.ok) {
           throw res;
         }
+        res.json();
+      })
+      .then((data) => {
+        // POST SHOP
+        const formData = new FormData();
+        formData.append("shopname", values.shopname);
+        formData.append("shopname_de", values.shopname_de);
+        formData.append("address", values.address);
+        formData.append("commercialID", values.commercialID);
+        formData.append("owner", data._id);
+        formData.append("phone", values.phone);
+        formData.append("category", values.category);
+        formData.append("file", files[0]);
+        fetch(API_URL + "/shops", {
+          method: "POST",
+          mimeType: "multipart/form-data",
+          contentType: false,
+          body: formData,
+          headers: {
+            "x-auth-token": localStorage.getItem("token"),
+          },
+        })
+          .then((res) => {
+            if (res.ok) {
+              showNotification("Shop saved Successfully");
+
+              setTimeout(function () {
+                props.history.push({
+                  pathname: "/shops",
+                });
+              }, 500);
+
+              // alert("Perfect! ");
+            } else if (!res.ok) {
+              throw res;
+            }
+          })
+          .catch((err) => {
+            err.text().then((errorMessage) => {
+              setError(errorMessage);
+            });
+          });
       })
       .catch((err) => {
         err.text().then((errorMessage) => {
           setError(errorMessage);
         });
       });
+
     event.preventDefault();
   };
   return (
@@ -121,19 +174,88 @@ export default function ShopCreate(props) {
           </Alert>
         )}
         <form onSubmit={handleSubmit}>
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <FormControl fullWidth className={classes.margin}>
+                <InputLabel htmlFor="standard-adornment-amount">
+                  First Name
+                </InputLabel>
+                <Input
+                  id="firstname"
+                  name="firstname"
+                  value={values.firstname}
+                  onChange={handleChange("firstname")}
+                />
+              </FormControl>
+            </Grid>
+            <Grid item xs={6}>
+              <FormControl fullWidth className={classes.margin}>
+                <InputLabel htmlFor="standard-adornment-amount">
+                  Last Name
+                </InputLabel>
+                <Input
+                  id="lastname"
+                  name="lastname"
+                  value={values.lastname}
+                  onChange={handleChange("lastname")}
+                />
+              </FormControl>
+            </Grid>
+            <Grid item xs={6}>
+              <FormControl fullWidth className={classes.margin}>
+                <InputLabel htmlFor="standard-adornment-amount">
+                  Email
+                </InputLabel>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={values.email}
+                  onChange={handleChange("email")}
+                />
+              </FormControl>
+            </Grid>
+            <Grid item xs={6}>
+              <FormControl fullWidth className={classes.margin}>
+                <InputLabel htmlFor="standard-adornment-amount">
+                  Password
+                </InputLabel>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  value={values.password}
+                  onChange={handleChange("password")}
+                />
+              </FormControl>
+            </Grid>
+            <Grid item xs={6}>
+              <FormControl fullWidth className={classes.margin}>
+                <InputLabel htmlFor="shopname">Shop Name</InputLabel>
+                <Input
+                  id="shopname"
+                  name="shopname"
+                  value={values.shopname}
+                  onChange={handleChange("shopname")}
+                />
+              </FormControl>
+            </Grid>
+            <Grid item xs={6}>
+              <FormControl fullWidth className={classes.margin}>
+                <InputLabel htmlFor="shopname_de">
+                  Shop Name in German
+                </InputLabel>
+                <Input
+                  id="shopname_de"
+                  name="shopname_de"
+                  value={values.shopname_de}
+                  onChange={handleChange("shopname_de")}
+                />
+              </FormControl>
+            </Grid>
+          </Grid>
           <FormControl fullWidth className={classes.margin}>
-            <InputLabel htmlFor="standard-adornment-amount">
-              Shop Name
-            </InputLabel>
-            <Input
-              id="shopname"
-              name="shopname"
-              value={values.shopname}
-              onChange={handleChange("shopname")}
-            />
-          </FormControl>
-          <FormControl fullWidth className={classes.margin}>
-            <InputLabel htmlFor="standard-adornment-amount">Address</InputLabel>
+            <InputLabel htmlFor="address">Address</InputLabel>
             <Input
               id="address"
               name="address"
@@ -142,9 +264,7 @@ export default function ShopCreate(props) {
             />
           </FormControl>
           <FormControl fullWidth className={classes.margin}>
-            <InputLabel htmlFor="standard-adornment-amount">
-              Commercial ID
-            </InputLabel>
+            <InputLabel htmlFor="commercialID">Commercial ID</InputLabel>
             <Input
               id="commercialID"
               name="commercialID"
@@ -163,7 +283,7 @@ export default function ShopCreate(props) {
             />
           </FormControl>
           <TextField
-            id="standard-select-category"
+            id="category"
             select
             label="Select"
             value={values.category}
@@ -171,8 +291,8 @@ export default function ShopCreate(props) {
             helperText="Please select your category"
           >
             {categories.map((option) => (
-              <MenuItem key={option.id} value={option.id}>
-                {option.name}
+              <MenuItem key={option._id} value={option._id}>
+                {option.name[locale]}
               </MenuItem>
             ))}
           </TextField>

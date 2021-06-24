@@ -10,7 +10,8 @@ import ShopList from "./components/shop/ShopList";
 import ShopShow from "./components/shop/ShopShow";
 import ShopEdit from "./components/shop/ShopEdit";
 import ShopCreate from "./components/shop/ShopCreate";
-import myDataProvider from "./MyDataProvider";
+import simpleRestProvider from "ra-data-simple-rest";
+import { fetchUtils } from "react-admin";
 import CategoriesList from "./components/categories/CategoriesList";
 import CategoriesEdit from "./components/categories/CategoriesEdit";
 import SubCategoriesList from "./components/subcategories/SubCategoriesList";
@@ -21,25 +22,28 @@ import ProductList from "./components/products/ProductList";
 import ProductEdit from "./components/products/ProductEdit";
 import i18nProvider from "./polyglotProvider";
 import ShopProductCreate from "./components/shopProducts/ShopProductCreate";
+import ShopProductList from "./components/shopProducts/ShopProductList";
 import CategoriesCreate from "./components/categories/CategoriesCreate";
-
+import { API_URL } from "./config";
+import MyDataProvider from "./MyDataProvider";
+import ShopProductEdit from "./components/shopProducts/ShopProductEdit";
 function App() {
   const [permission, setPermissions] = useState("");
+
   useEffect(() => {
     authProvider
       .getPermissions()
       .then((permission) => setPermissions(permission));
   }, "none");
-  console.log(permission);
   return (
     <Admin
       dashboard={Dashboard}
       loginPage={LoginPage}
       authProvider={authProvider}
-      dataProvider={myDataProvider}
+      dataProvider={MyDataProvider}
       layout={MyLayout}
       i18nProvider={i18nProvider}
-      locale="en"
+      // locale="en"
     >
       <Resource
         name="shops"
@@ -78,9 +82,10 @@ function App() {
       <Resource
         name="shop-products"
         label="ShopProducts"
-        list={ProductList}
+        list={ShopProductList}
         permission={authProvider.getPermissions()}
-        create={ShopProductCreate}
+        create={permission === "member" ? ShopProductCreate : null}
+        edit={permission === "member" ? ShopProductEdit : null}
       />
     </Admin>
   );

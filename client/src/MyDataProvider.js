@@ -1,60 +1,104 @@
-import simpleRestProvider from "ra-data-simple-rest";
 import { fetchUtils } from "react-admin";
+import { stringify } from "query-string";
 
-import { API_URL } from "./config";
+const apiUrl = "/api";
+// const httpClient = fetchUtils.fetchJson;
 const httpClient = (url, options = {}) => {
   if (!options.headers) {
     options.headers = new Headers({ Accept: "application/json" });
   }
   options.headers.set("x-auth-token", localStorage.getItem("token"));
+  options.headers.set("language", localStorage.getItem("language"));
   return fetchUtils.fetchJson(url, options);
 };
-const dataProvider = simpleRestProvider(API_URL, httpClient);
 
-const myDataProvider = {
-  ...dataProvider,
-  update: (resource, params) => {
-    if (resource !== "posts" || !params.data.pictures) {
-      // fallback to the default implementation
-      return dataProvider.update(resource, params);
-    }
-    // The posts edition form uses a file upload widget for the pictures field.
-    // Freshly dropped pictures are File objects
-    // and must be converted to base64 strings
-    const newPictures = params.data.pictures.filter((p) => p.rawFile);
-    const formerPictures = params.data.pictures.filter((p) => !p.rawFile);
+export default {
+  getList: (resource, params) => {
+    const { page, perPage } = params.pagination;
+    const { field, order } = params.sort;
+    const query = {
+      sort: JSON.stringify([field, order]),
+      range: JSON.stringify([(page - 1) * perPage, page * perPage - 1]),
+      filter: JSON.stringify(params.filter),
+    };
+    const url = `${apiUrl}/${resource}?${stringify(query)}`;
 
-    return Promise.all(newPictures.map(convertFileToBase64))
-      .then((base64Pictures) =>
-        base64Pictures.map((picture64) => ({
-          src: picture64,
-          title: `${params.data.title}`,
-        }))
-      )
-      .then((transformedNewPictures) =>
-        dataProvider.update(resource, {
-          ...params,
-          data: {
-            ...params.data,
-            pictures: [...transformedNewPictures, ...formerPictures],
-          },
-        })
-      );
+    return httpClient(url).then(({ headers, json }) => ({
+      data: json.map((resource) => ({ ...resource, id: resource._id })),
+      total: parseInt(headers.get("content-range").split("/").pop(), 10),
+    }));
+  },
+
+  getOne: (resource, params) =>
+    httpClient(`${apiUrl}/${resource}/${params.id}`).then(({ json }) => ({
+      data: { ...json, id: json._id },
+    })),
+
+  getMany: (resource, params) => {
+    const query = {
+      filter: JSON.stringify({ id: params.ids }),
+    };
+    const url = `${apiUrl}/${resource}?${stringify(query)}`;
+    return httpClient(url).then(({ json }) => ({
+      data: json.map((resource) => ({ ...resource, id: resource._id })),
+    }));
+  },
+
+  getManyReference: (resource, params) => {
+    const { page, perPage } = params.pagination;
+    const { field, order } = params.sort;
+    const query = {
+      sort: JSON.stringify([field, order]),
+      range: JSON.stringify([(page - 1) * perPage, page * perPage - 1]),
+      filter: JSON.stringify({
+        ...params.filter,
+        [params.target]: params.id,
+      }),
+    };
+    const url = `${apiUrl}/${resource}?${stringify(query)}`;
+
+    return httpClient(url).then(({ headers, json }) => ({
+      data: json.map((resource) => ({ ...resource, id: resource._id })),
+      total: parseInt(headers.get("content-range").split("/").pop(), 10),
+    }));
+  },
+
+  update: (resource, params) =>
+    httpClient(`${apiUrl}/${resource}/${params.id}`, {
+      method: "PUT",
+      body: JSON.stringify(params.data),
+    }).then(({ json }) => ({ data: { ...json, id: json._id } })),
+
+  updateMany: (resource, params) => {
+    const query = {
+      filter: JSON.stringify({ id: params.ids }),
+    };
+    return httpClient(`${apiUrl}/${resource}?${stringify(query)}`, {
+      method: "PUT",
+      body: JSON.stringify(params.data),
+    }).then(({ json }) => ({ data: json }));
+  },
+
+  create: (resource, params) =>
+    httpClient(`${apiUrl}/${resource}`, {
+      method: "POST",
+      body: JSON.stringify(params.data),
+    }).then(({ json }) => ({ data: { ...params.data, id: json._id } })),
+
+  delete: (resource, params) =>
+    httpClient(`${apiUrl}/${resource}/${params.id}`, {
+      method: "DELETE",
+    }).then(({ json }) => ({ data: { ...json, id: json._id } })),
+
+  deleteMany: (resource, params) => {
+    const query = {
+      filter: JSON.stringify({ id: params.ids }),
+    };
+    return httpClient(`${apiUrl}/${resource}?${stringify(query)}`, {
+      method: "DELETE",
+      body: JSON.stringify(params.data),
+    }).then((json) => ({
+      data: json.map((resource) => ({ ...resource, id: resource._id })),
+    }));
   },
 };
-
-/**
- * Convert a `File` object returned by the upload input into a base 64 string.
- * That's not the most optimized way to store images in production, but it's
- * enough to illustrate the idea of data provider decoration.
- */
-const convertFileToBase64 = (file) =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-
-    reader.readAsDataURL(file.rawFile);
-  });
-
-export default myDataProvider;

@@ -3,7 +3,6 @@ const mongoose = require("mongoose");
 const { categorySchema } = require("./category");
 const { userSchema } = require("./user");
 const Schema = mongoose.Schema;
-const geocoder = require("../startup/geocoder");
 
 const shopSchema = new mongoose.Schema({
   shopname: {
@@ -12,7 +11,7 @@ const shopSchema = new mongoose.Schema({
     trim: true,
     minlength: 5,
     maxlength: 255,
-    unique: true,
+    intl: true,
   },
   address: {
     type: String,
@@ -42,9 +41,6 @@ const shopSchema = new mongoose.Schema({
     required: true,
     minlength: 2,
     maxlength: 200,
-    get: function (v) {
-      return "http://localhost:5000/public/uploads/" + v;
-    },
   },
   commercialID: {
     type: String,
@@ -86,24 +82,18 @@ const shopSchema = new mongoose.Schema({
   },
 });
 
-shopSchema.set("toObject", { getters: true });
-shopSchema.set("toJSON", { getters: true });
-
-shopSchema.virtual("id").get(function () {
-  return this._id.toHexString();
-});
-
 const Shop = mongoose.model("Shops", shopSchema);
 
 function validateShop(shop) {
   const schema = {
     shopname: Joi.string().min(2).max(50).required(),
+    shopname_de: Joi.string().min(2).max(50).required(),
     address: Joi.string().min(5).max(255).required(),
     commercialID: Joi.string().min(2).max(15).required(),
     phone: Joi.string().min(2).max(20).required(),
     owner: Joi.objectId().required(),
+    file: Joi.optional(),
     category: Joi.objectId().required(),
-    filename: Joi.object(),
   };
 
   return Joi.validate(shop, schema);

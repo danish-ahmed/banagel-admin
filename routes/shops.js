@@ -1,13 +1,15 @@
 const { Shop, validate } = require("../models/shop");
 const { User } = require("../models/user");
-const { Category } = require("../models/category");
+const { Category, categorySchema } = require("../models/category");
 const auth = require("../middleware/auth");
 const admin = require("../middleware/admin");
 const validateObjectId = require("../middleware/validateObjectId");
 const moment = require("moment");
 const express = require("express");
 const router = express.Router();
+const range = require("express-range");
 const upload = require("../middleware/fileUpload");
+const _ = require("lodash");
 router.get("/:id", validateObjectId, async (req, res) => {
   const shop = await Shop.findById(req.params.id).select("-__v");
 
@@ -24,23 +26,23 @@ router.get("/", [auth], async (req, res) => {
   //     ? (filters.shopname = "/" + filters.shopname.replace(/['"]+/g, "") + "/")
   //     : null;
   // }
-  // console.log(filters);
   if (req.user.role !== "admin") {
     const shops = await Shop.find()
-      .where({ "owner._id": req.user._id })
+      .where({ owner: req.user })
       .select("-__v")
       .sort("name");
-
     res.range({
       first: req.range.first,
       last: req.range.last,
       length: shops.length,
     });
-
-    res.send(shops);
+    res.send(shops.slice(req.range.first, req.range.last + 1));
   }
   //All Shops for admin
-  const shops = await Shop.find().select("-__v").sort("name");
+  const shops = await Shop.find()
+    // .where({ ...filters })
+    .select("-__v")
+    .sort("name");
 
   //Pagination
   res.range({
@@ -60,8 +62,7 @@ router.post("/", [auth, upload], async (req, res) => {
 
   const category = await Category.findById(req.body.category);
   if (!category) return res.status(400).send("Invalid Shop Category.");
-
-  const _file = req.file.filename;
+  const _file = req.file;
 
   if (!_file) {
     res.status(400).json({
@@ -70,20 +71,20 @@ router.post("/", [auth, upload], async (req, res) => {
       data: {},
     });
   }
+  const shopname = {
+    en: req.body.shopname,
+    de: req.body.shopname_de,
+  };
 
   const shop = new Shop({
-    shopname: req.body.shopname,
+    shopname: shopname,
     address: req.body.address,
     commercialID: req.body.commercialID,
-    owner: {
-      _id: user._id,
-      firstname: user.firstname,
-      lastname: user.lastname,
-    },
-    category: { _id: category._id, name: category.name },
+    owner: _.pick(user, "_id", "firstname", "lastname", "email"),
+    category: category,
     phone: req.body.phone,
     publishDate: moment().toJSON(),
-    filename: _file,
+    filename: req.protocol + "://" + req.headers.host + _file.filename,
   });
   await shop.save();
 
@@ -100,23 +101,28 @@ router.put("/:id", [auth, upload], async (req, res) => {
   const category = await Category.findById(req.body.category);
   if (!category) return res.status(400).send("Invalid Shop Category.");
 
+  const shopname = {
+    en: req.body.shopname,
+    de: req.body.shopname_de,
+  };
   const _file = req.file;
   if (_file) {
     let shop = await Shop.findByIdAndUpdate(
       req.params.id,
       {
-        shopname: req.body.shopname,
+        shopname: shopname,
         address: req.body.address,
         commercialID: req.body.commercialID,
-        owner: {
-          _id: user._id,
-          firstname: user.firstname,
-          lastname: user.lastname,
-        },
-        category: { _id: category._id, name: category.name },
+        owner: _.pick(user, "_id", "firstname", "lastname", "email"),
+        category: category,
         phone: req.body.phone,
         publishDate: moment().toJSON(),
-        filename: _file.filename,
+        filename:
+          req.protocol +
+          "://" +
+          req.headers.host +
+          "/public/uploads/" +
+          _file.filename,
       },
       { new: true }
     );
@@ -128,11 +134,11 @@ router.put("/:id", [auth, upload], async (req, res) => {
     let shop = await Shop.findByIdAndUpdate(
       req.params.id,
       {
-        shopname: req.body.shopname,
+        shopname: shopname,
         address: req.body.address,
         commercialID: req.body.commercialID,
-        owner: user._id,
-        category: { _id: category._id, name: category.name },
+        owner: _.pick(user, "_id", "firstname", "lastname", "email"),
+        category: category,
         phone: req.body.phone,
         publishDate: moment().toJSON(),
       },
@@ -149,13 +155,13 @@ router.delete("/:id", [auth, admin], async (req, res) => {
   const shop = await Shop.findByIdAndRemove(req.params.id);
 
   if (!shop)
-    return res.status(404).send("The movie with the given ID was not found.");
+    return res.status(404).send("The Shop with the given ID was not found.");
 
   res.send(shop);
 });
 
 router.get("/:id", validateObjectId, async (req, res) => {
-  const movie = await Movie.findById(req.params.id).select("-__v");
+  const shop = await Movie.findById(req.params.id).select("-__v");
 
   if (!movie)
     return res.status(404).send("The movie with the given ID was not found.");

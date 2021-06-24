@@ -10,6 +10,7 @@ const productSchema = new mongoose.Schema({
     minlength: 5,
     maxlength: 255,
     unique: true,
+    intl: true,
   },
   category: {
     type: subCategorySchema,
@@ -20,9 +21,6 @@ const productSchema = new mongoose.Schema({
     required: true,
     minlength: 2,
     maxlength: 200,
-    get: function (v) {
-      return "http://localhost:5000/public/uploads/" + v;
-    },
   },
   price: {
     type: Number,
@@ -36,16 +34,10 @@ const productSchema = new mongoose.Schema({
   },
 });
 
-productSchema.set("toObject", { getters: true });
-productSchema.set("toJSON", { getters: true });
-
-productSchema.virtual("id").get(function () {
-  return this._id.toHexString();
-});
-
 function validateProduct(product) {
   const schema = {
     name: Joi.string().min(2).max(50).required(),
+    name_de: Joi.string().min(2).max(50).required(),
     category: Joi.objectId().required(),
     image: Joi.object(),
     price: Joi.number().min(0).required(),

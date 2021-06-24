@@ -14,7 +14,7 @@ const englishMessages = {
     },
   },
 };
-const frenchMessages = {
+const germanMessages = {
   ra: {
     notification: {
       http_error: "Erreur réseau, veuillez réessayer",
@@ -30,7 +30,7 @@ const frenchMessages = {
 };
 
 const i18nProvider = polyglotI18nProvider(
-  (locale) => (locale === "fr" ? frenchMessages : englishMessages),
+  (locale) => (locale === "de" ? germanMessages : englishMessages),
   "en" // Default locale
 );
 

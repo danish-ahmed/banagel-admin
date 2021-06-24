@@ -7,17 +7,12 @@ const categorySchema = new mongoose.Schema({
     required: true,
     minlength: 4,
     maxlength: 50,
-    unique: true,
+    intl: true,
   },
-});
-categorySchema.virtual("id").get(function () {
-  return this._id.toHexString();
 });
 
 // Ensure virtual fields are serialised.
-categorySchema.set("toJSON", {
-  virtuals: true,
-});
+
 const Category = mongoose.model("Category", categorySchema);
 
 function validateCategory(genre) {

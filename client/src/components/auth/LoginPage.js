@@ -44,12 +44,7 @@ const LoginPage = ({ theme }) => {
   return (
     <ThemeProvider theme={createMuiTheme(defaultTheme)}>
       <Login>
-        <Container
-          component="main"
-          maxWidth="xs"
-          justify="center"
-          maxWidth="sm"
-        >
+        <Container component="main" justify="center" maxWidth="sm">
           <form onSubmit={submit} noValidate autoComplete="off">
             <div className={classes.paper}>
               <Typography variant="h5" component="h5">

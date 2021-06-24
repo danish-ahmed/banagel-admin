@@ -46,7 +46,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function ShopProductCreate(props) {
+export default function ShopProductEdit(props) {
   const classes = useStyles();
   const locale = useLocale();
   const [values, setValues] = React.useState({
@@ -55,7 +55,7 @@ export default function ShopProductCreate(props) {
     shop: "",
     price: "",
     category: "",
-    discount: 0,
+    discount: "",
     VAT: 0,
     selectedTags: [],
   });
@@ -63,10 +63,10 @@ export default function ShopProductCreate(props) {
   const [tag, setTag] = React.useState("");
 
   const [selectedProduct, setSelectedProduct] = React.useState();
+  const [selectedProductName, setSelectedProductName] = React.useState();
   const [files, setFiles] = React.useState();
   const [error, setError] = React.useState("");
   const [hasDiscount, setHasDiscount] = React.useState(false);
-  const [discount, setDiscount] = React.useState(false);
   const [categories, setCategories] = React.useState([]);
   const [description, setdescription] = React.useState();
   const [open, setOpen] = React.useState(false);
@@ -85,47 +85,41 @@ export default function ShopProductCreate(props) {
     }
     getSubcategories();
 
-    async function getProducts() {
-      const product_response = await fetch(API_URL + "/products/" + props.id, {
-        method: "GET",
-        headers: new Headers({
-          Accept: "application/json",
-        }),
-      });
-      let product = await product_response.json();
-      if (product) {
+    async function getShopProducts() {
+      const product_response = await fetch(
+        API_URL + "/shop-products/" + props.id,
+        {
+          method: "GET",
+          headers: new Headers({
+            Accept: "application/json",
+          }),
+        }
+      );
+      let shopproduct = await product_response.json();
+      if (shopproduct) {
+        setSelectedProduct(shopproduct.product._id);
+        setSelectedProductName(shopproduct.product);
         setValues({
           ...values,
-          ["name"]: product.name,
-          ["price"]: product.price,
-          ["category"]: product.category._id,
+          ["name"]: shopproduct.name.en,
+          ["name_de"]: shopproduct.name.de,
+          ["price"]: shopproduct.price,
+          ["VAT"]: shopproduct.VAT ? shopproduct.VAT : 0,
+          ["shop"]: shopproduct.shop._id,
+          ["category"]: shopproduct.category._id,
+          ["selectedTags"]: shopproduct.tags,
+          ["discount"]: shopproduct.discount ? shopproduct.discount : 0,
         });
-        setdescription(product.description);
-        const file = new File([product.image], "image");
-        setFiles(file);
+        setHasDiscount(shopproduct.hasDiscount);
+        setdescription(shopproduct.description);
       } else {
         // ---------------
         // DONOT SHOW FORM
         // ---------------
       }
     }
-    async function getShop() {
-      const response = await fetch(
-        API_URL +
-          "/users/user-shop/" +
-          decodeJwt(localStorage.getItem("token"))._id,
-        {
-          method: "GET",
-          headers: new Headers({
-            Accept: "application/json",
-            "x-auth-token": localStorage.getItem("token"),
-          }),
-        }
-      );
-      let shop = await response.json();
-      setValues({ ...values, ["shop"]: shop._id });
-    }
-    getShop();
+    getShopProducts();
+
     async function getTags() {
       const response = await fetch(API_URL + "/tags", {
         method: "GET",
@@ -237,8 +231,8 @@ export default function ShopProductCreate(props) {
     hasDiscount && formData.append("discount_end_date", dateRange.endDate);
 
     setError("");
-    fetch(API_URL + `/shop-products`, {
-      method: "POST",
+    fetch(API_URL + `/shop-products/${props.id}`, {
+      method: "PUT",
       mimeType: "multipart/form-data",
       contentType: false,
       body: formData,
@@ -282,7 +276,10 @@ export default function ShopProductCreate(props) {
         )}
         <form id="product-from" onSubmit={handleSubmit}>
           <FormControl fullWidth className={classes.margin}>
-            <ProductSelect handleSelect={handleProductSelect} />
+            <ProductSelect
+              handleSelect={handleProductSelect}
+              initialVal={selectedProductName}
+            />
           </FormControl>
           {selectedProduct && (
             <div>

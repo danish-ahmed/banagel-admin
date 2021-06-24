@@ -4,9 +4,10 @@ import TextField from "@material-ui/core/TextField";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import { API_URL } from "../../config";
 import { useLocale } from "react-admin";
-export default function ProductSelect(props) {
+export default function ProductSelect2(props) {
   const locale = useLocale();
   const [products, setProducts] = React.useState([]);
+  const [initialVal, setInitialVal] = React.useState();
   React.useEffect(() => {
     // setValues({ ...values, ["owner"]: localStorage.getItem("user").id });
     async function getData() {
@@ -20,6 +21,21 @@ export default function ProductSelect(props) {
       setProducts(result);
     }
     getData();
+    async function getShopProducts() {
+      const product_response = await fetch(
+        API_URL + "/shop-products/" + props.id,
+        {
+          method: "GET",
+          headers: new Headers({
+            Accept: "application/json",
+          }),
+        }
+      );
+      let shopproduct = await product_response.json();
+      if (shopproduct) {
+      }
+    }
+    getShopProducts();
   }, []);
   //
   // const options = products.map((option) => {
@@ -31,7 +47,7 @@ export default function ProductSelect(props) {
   // });
   //
 
-  return props.initialVal ? (
+  return (
     <Autocomplete
       id="grouped-demo"
       options={products}
@@ -41,20 +57,8 @@ export default function ProductSelect(props) {
       renderInput={(params) => (
         <TextField {...params} label="Select Product" variant="outlined" />
       )}
-      defaultValue={props.initialVal}
-      value={props.initialVal}
-      onChange={props.handleSelect}
-    />
-  ) : (
-    <Autocomplete
-      id="grouped-demo"
-      options={products}
-      groupBy={(option) => option.category.name[locale]}
-      getOptionLabel={(option) => option.name[locale]}
-      style={{ width: 300 }}
-      renderInput={(params) => (
-        <TextField {...params} label="Select Product" variant="outlined" />
-      )}
+      defaultValue={initialVal}
+      value={initialVal}
       onChange={props.handleSelect}
     />
   );

@@ -5,7 +5,8 @@ export default function CategoriesEdit(props) {
   return (
     <Edit {...props}>
       <SimpleForm>
-        <TextInput source="name" />
+        <TextInput source="name.en" label="Name in English" />
+        <TextInput source="name.de" label="Name in German" />
       </SimpleForm>
     </Edit>
   );

@@ -44,10 +44,13 @@ router.post("/", [upload], async (req, res) => {
       data: {},
     });
   }
-
+  const name = {
+    en: req.body.name,
+    de: req.body.name_de,
+  };
   const product = new Product({
-    name: req.body.name,
-    image: _file,
+    name: name,
+    image: req.protocol + "://" + req.headers.host + "/public/uploads/" + _file,
     category: subcategory,
     price: req.body.price,
     description: req.body.description,
@@ -64,15 +67,16 @@ router.put("/:id", [validateObjectId, upload], async (req, res) => {
 
   const subcategory = await SubCategory.findById(req.body.category);
   if (!subcategory) return res.status(400).send("Invalid Category.");
-
   if (req.file) {
     const _file = req.file.filename;
+    const product_name = { en: req.body.name, de: req.body.name_de };
 
     let product = await Product.findByIdAndUpdate(
       req.params.id,
       {
-        name: req.body.name,
-        image: _file,
+        name: product_name,
+        image:
+          req.protocol + "://" + req.headers.host + "/public/uploads/" + _file,
         category: subcategory,
         price: req.body.price,
         description: req.body.description,
@@ -87,10 +91,11 @@ router.put("/:id", [validateObjectId, upload], async (req, res) => {
 
     res.send(product);
   } else {
+    const product_name = { en: req.body.name, de: req.body.name_de };
     let product = await Product.findByIdAndUpdate(
       req.params.id,
       {
-        name: req.body.name,
+        name: product_name,
         category: subcategory,
         price: req.body.price,
         description: req.body.description,
@@ -106,5 +111,12 @@ router.put("/:id", [validateObjectId, upload], async (req, res) => {
     res.send(product);
   }
 });
+router.delete("/:id", [auth, admin, validateObjectId], async (req, res) => {
+  const product = await Product.findByIdAndRemove(req.params.id);
 
+  if (!product)
+    return res.status(404).send("The Product with the given ID was not found.");
+
+  res.send(product);
+});
 module.exports = router;

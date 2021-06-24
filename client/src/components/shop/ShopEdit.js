@@ -1,5 +1,11 @@
 import React from "react";
-import { FormControl, InputLabel, Input, MenuItem } from "@material-ui/core";
+import {
+  FormControl,
+  Grid,
+  InputLabel,
+  Input,
+  MenuItem,
+} from "@material-ui/core";
 import TextField from "@material-ui/core/TextField";
 import decodeJwt from "jwt-decode";
 
@@ -11,7 +17,7 @@ import Typography from "@material-ui/core/Typography";
 import { Alert } from "@material-ui/lab";
 import { DropzoneArea } from "material-ui-dropzone";
 import MuiPhoneInput from "material-ui-phone-number";
-import { showNotification } from "react-admin";
+import { useLocale, showNotification } from "react-admin";
 import { API_URL } from "../../config";
 
 const useStyles = makeStyles((theme) => ({
@@ -32,9 +38,11 @@ const useStyles = makeStyles((theme) => ({
 
 export default function ShopEdit(props) {
   showNotification("Shop saved Successfully");
+  const locale = useLocale();
   const classes = useStyles();
   const [values, setValues] = React.useState({
     shopname: "",
+    shopname_de: "",
     address: "",
     commercialID: "",
     phone: "",
@@ -45,39 +53,45 @@ export default function ShopEdit(props) {
   const [error, setError] = React.useState("");
 
   const [categories, setCategories] = React.useState([]);
-  React.useEffect(async () => {
+  React.useEffect(() => {
     // setValues({ ...values, ["owner"]: localStorage.getItem("user").id });
-    const response = await fetch(API_URL + "/categories", {
-      method: "GET",
-      headers: new Headers({
-        Accept: "application/json",
-      }),
-    });
-    let result = await response.json();
-    setCategories(result);
-
-    const shop_response = await fetch(API_URL + "/shops/" + props.id, {
-      method: "GET",
-      headers: new Headers({
-        Accept: "application/json",
-      }),
-    });
-    let shop = await shop_response.json();
-    if (shop) {
-      setValues({
-        shopname: shop.shopname,
-        address: shop.address,
-        category: shop.category.id,
-        owner: shop.owner._id,
-        commercialID: shop.commercialID,
-        filename: shop.filename,
-        phone: shop.phone,
+    async function getCategories() {
+      const response = await fetch(API_URL + "/categories", {
+        method: "GET",
+        headers: new Headers({
+          Accept: "application/json",
+        }),
       });
-    } else {
-      // ---------------
-      // DONOT SHOW FORM
-      // ---------------
+      let result = await response.json();
+      setCategories(result);
     }
+    getCategories();
+    async function getShop() {
+      const shop_response = await fetch(API_URL + "/shops/" + props.id, {
+        method: "GET",
+        headers: new Headers({
+          Accept: "application/json",
+        }),
+      });
+      let shop = await shop_response.json();
+      if (shop) {
+        setValues({
+          shopname: shop.shopname.en,
+          shopname_de: shop.shopname.de,
+          address: shop.address,
+          category: shop.category._id,
+          owner: shop.owner._id,
+          commercialID: shop.commercialID,
+          filename: shop.filename,
+          phone: shop.phone,
+        });
+      } else {
+        // ---------------
+        // DONOT SHOW FORM
+        // ---------------
+      }
+    }
+    getShop();
   }, []);
 
   const handleChange = (prop) => (event) => {
@@ -93,9 +107,10 @@ export default function ShopEdit(props) {
   const handleSubmit = (event) => {
     const formData = new FormData();
     formData.append("shopname", values.shopname);
+    formData.append("shopname_de", values.shopname_de);
     formData.append("address", values.address);
     formData.append("commercialID", values.commercialID);
-    formData.append("owner", values.owner);
+    formData.append("owner", decodeJwt(localStorage.getItem("token"))._id);
     formData.append("phone", values.phone);
     formData.append("category", values.category);
     formData.append("file", files[0]);
@@ -144,17 +159,32 @@ export default function ShopEdit(props) {
           </Alert>
         )}
         <form onSubmit={handleSubmit}>
-          <FormControl fullWidth className={classes.margin}>
-            <InputLabel htmlFor="standard-adornment-amount">
-              Shop Name
-            </InputLabel>
-            <Input
-              id="shopname"
-              name="shopname"
-              value={values.shopname}
-              onChange={handleChange("shopname")}
-            />
-          </FormControl>
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <FormControl fullWidth className={classes.margin}>
+                <InputLabel htmlFor="shopname">Shop Name</InputLabel>
+                <Input
+                  id="shopname"
+                  name="shopname"
+                  value={values.shopname}
+                  onChange={handleChange("shopname")}
+                />
+              </FormControl>
+            </Grid>
+            <Grid item xs={6}>
+              <FormControl fullWidth className={classes.margin}>
+                <InputLabel htmlFor="shopname_de">
+                  Shop Name in German
+                </InputLabel>
+                <Input
+                  id="shopname_de"
+                  name="shopname_de"
+                  value={values.shopname_de}
+                  onChange={handleChange("shopname_de")}
+                />
+              </FormControl>
+            </Grid>
+          </Grid>
           <FormControl fullWidth className={classes.margin}>
             <InputLabel htmlFor="standard-adornment-amount">Address</InputLabel>
             <Input
@@ -195,11 +225,11 @@ export default function ShopEdit(props) {
           >
             {categories.map((option) => (
               <MenuItem
-                key={option.id}
-                value={option.id}
-                selected={option.id === values.category}
+                key={option._id}
+                value={option._id}
+                selected={option._id === values.category}
               >
-                {option.name}
+                {option.name[locale]}
               </MenuItem>
             ))}
           </TextField>

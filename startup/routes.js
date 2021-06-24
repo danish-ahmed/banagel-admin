@@ -1,5 +1,6 @@
 const express = require("express");
 const categories = require("../routes/categories");
+const tags = require("../routes/tags");
 const subcategories = require("../routes/subcategories");
 const customers = require("../routes/customers");
 const shops = require("../routes/shops");
@@ -14,6 +15,7 @@ const error = require("../middleware/error");
 module.exports = function (app) {
   app.use(express.json());
   app.use("/api/categories", categories);
+  app.use("/api/tags", tags);
   app.use("/api/subcategories", subcategories);
   app.use("/api/customers", customers);
   app.use("/api/shops", shops);

@@ -3,10 +3,8 @@ import {
   Show,
   SimpleShowLayout,
   TextField,
-  DateField,
   ImageField,
   EditButton,
-  RichTextField,
 } from "react-admin";
 
 export default function ShopShow(props) {

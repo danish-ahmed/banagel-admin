@@ -1,27 +1,24 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   List,
   Datagrid,
   TextField,
-  DateField,
-  Filter,
-  TextInput,
   EditButton,
-  CreateButton,
   DeleteButton,
+  useLocale,
 } from "react-admin";
-import authProvider from "../../authProvider";
 
 const CategoriesList = (props) => {
+  const locale = useLocale();
   return (
     <List {...props}>
       <Datagrid>
-        <TextField source="_id" />
-        <TextField source="name" />
-        {props.permissions == "admin" && (
+        <TextField source="id" />
+        <TextField source={`name.${locale}`} label="Name" />
+        {props.permissions === "admin" && (
           <EditButton basePath="/categories" label="Edit" />
         )}
-        {props.permissions == "admin" && (
+        {props.permissions === "admin" && (
           <DeleteButton basePath="/categories" label="Delete" />
         )}
       </Datagrid>

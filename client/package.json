@@ -1,5 +1,6 @@
 {
   "name": "client",
+  "proxy": "http://localhost:5000",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -12,6 +13,7 @@
     "jwt-decode": "^3.1.2",
     "material-ui-dropzone": "^3.5.0",
     "material-ui-phone-number": "^2.2.6",
+    "materialui-daterange-picker": "^1.1.92",
     "ra-data-simple-rest": "^3.13.4",
     "ra-i18n-polyglot": "^3.16.0",
     "react": "^17.0.2",

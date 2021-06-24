@@ -14,10 +14,13 @@ router.post("/", [auth, admin], async (req, res) => {
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
   const category = await Category.findById(req.body.category);
-
+  const name = {
+    en: req.body.name,
+    de: req.body.name_de,
+  };
   let subcategory = new SubCategory({
-    name: req.body.name,
-    category: { _id: category._id, name: category.name },
+    name: name,
+    category: category,
   });
   subcategory = await subcategory.save();
 
@@ -62,7 +65,7 @@ router.get("/:id", validateObjectId, async (req, res) => {
   if (!subcategory)
     return res
       .status(404)
-      .send("The sub category with the given ID was not found.");
+      .send("The subcategory with the given ID was not found.");
 
   res.send(subcategory);
 });

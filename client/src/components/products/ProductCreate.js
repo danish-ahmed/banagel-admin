@@ -3,12 +3,13 @@ import { FormControl, InputLabel, Input, MenuItem } from "@material-ui/core";
 import TextField from "@material-ui/core/TextField";
 import { makeStyles } from "@material-ui/core/styles";
 import Card from "@material-ui/core/Card";
+import { Grid } from "@material-ui/core";
 import CardContent from "@material-ui/core/CardContent";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import { Alert } from "@material-ui/lab";
 import { DropzoneArea } from "material-ui-dropzone";
-import { showNotification } from "react-admin";
+import { showNotification, useLocale } from "react-admin";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import "./Product.css";
@@ -31,8 +32,10 @@ const useStyles = makeStyles((theme) => ({
 
 export default function ProductCreate(props) {
   const classes = useStyles();
+  const locale = useLocale();
   const [values, setValues] = React.useState({
     name: "",
+    name_de: "",
     price: "",
     category: "",
   });
@@ -41,16 +44,19 @@ export default function ProductCreate(props) {
   const [files, setFiles] = React.useState();
   const [error, setError] = React.useState("");
   const [categories, setCategories] = React.useState([]);
-  React.useEffect(async () => {
+  React.useEffect(() => {
     // setValues({ ...values, ["owner"]: localStorage.getItem("user").id });
-    const response = await fetch(API_URL + "/subcategories", {
-      method: "GET",
-      headers: new Headers({
-        Accept: "application/json",
-      }),
-    });
-    let result = await response.json();
-    setCategories(result);
+    async function getData() {
+      const response = await fetch(API_URL + "/subcategories", {
+        method: "GET",
+        headers: new Headers({
+          Accept: "application/json",
+        }),
+      });
+      let result = await response.json();
+      setCategories(result);
+    }
+    getData();
   }, []);
 
   const handleChange = (prop) => (event) => {
@@ -67,6 +73,7 @@ export default function ProductCreate(props) {
 
     const formData = new FormData();
     formData.append("name", values.name);
+    formData.append("name_de", values.name_de);
     formData.append("price", values.price);
     formData.append("category", values.category);
     formData.append("description", description);
@@ -118,44 +125,66 @@ export default function ProductCreate(props) {
             </Alert>
           )}
           <form onSubmit={handleSubmit}>
-            <FormControl fullWidth className={classes.margin}>
-              <InputLabel htmlFor="standard-adornment-amount">
-                Product Name
-              </InputLabel>
-              <Input
-                id="name"
-                name="name"
-                value={values.name}
-                onChange={handleChange("name")}
-              />
-            </FormControl>
-            <FormControl fullWidth className={classes.margin}>
-              <InputLabel htmlFor="standard-adornment-amount">Price</InputLabel>
-              <Input
-                id="price"
-                name="price"
-                value={values.price}
-                type="number"
-                onChange={handleChange("price")}
-              />
-            </FormControl>
-            <FormControl class="cat-control">
-              <TextField
-                id="standard-select-category"
-                select
-                label="Select Category"
-                value={values.category}
-                onChange={handleChangeCategory}
-                helperText="Please select your category"
-              >
-                {categories.map((option) => (
-                  <MenuItem key={option.id} value={option.id}>
-                    {option.name}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </FormControl>
-
+            <Grid container spacing={2}>
+              <Grid item xs={6}>
+                <FormControl fullWidth className={classes.margin}>
+                  <InputLabel htmlFor="name">Product Name</InputLabel>
+                  <Input
+                    id="name"
+                    name="name"
+                    value={values.name}
+                    onChange={handleChange("name")}
+                  />
+                </FormControl>
+              </Grid>
+              <Grid item xs={6}>
+                <FormControl fullWidth className={classes.margin}>
+                  <InputLabel htmlFor="name_de">
+                    Product Name in German
+                  </InputLabel>
+                  <Input
+                    id="name_de"
+                    name="name_de"
+                    value={values.name_de}
+                    onChange={handleChange("name_de")}
+                  />
+                </FormControl>
+              </Grid>
+            </Grid>
+            <Grid container spacing={2}>
+              <Grid item xs={6}>
+                <FormControl fullWidth className={classes.margin}>
+                  <InputLabel htmlFor="standard-adornment-amount">
+                    Price
+                  </InputLabel>
+                  <Input
+                    id="price"
+                    name="price"
+                    value={values.price}
+                    type="number"
+                    onChange={handleChange("price")}
+                  />
+                </FormControl>
+              </Grid>
+              <Grid item xs={6}>
+                <FormControl class="cat-control">
+                  <TextField
+                    id="category"
+                    select
+                    label="Select Category"
+                    value={values.category}
+                    onChange={handleChangeCategory}
+                    helperText="Please select your category"
+                  >
+                    {categories.map((option) => (
+                      <MenuItem key={option._id} value={option._id}>
+                        {option.name[locale]}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                </FormControl>
+              </Grid>
+            </Grid>
             <FormControl fullWidth>
               <label class="desc-label" htmlFor="description">
                 Description

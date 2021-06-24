@@ -7,10 +7,11 @@ import CardContent from "@material-ui/core/CardContent";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import { Alert } from "@material-ui/lab";
+import { Grid } from "@material-ui/core";
 import { DropzoneArea } from "material-ui-dropzone";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import { showNotification } from "react-admin";
+import { showNotification, useLocale } from "react-admin";
 import { API_URL } from "../../config";
 import "./Product.css";
 
@@ -34,45 +35,53 @@ export default function ProductEdit(props) {
   const classes = useStyles();
   const [values, setValues] = React.useState({
     name: "",
+    name_de: "",
     price: "",
     category: "",
   });
+  const locale = useLocale();
   const [files, setFiles] = React.useState();
   const [error, setError] = React.useState("");
   const [categories, setCategories] = React.useState([]);
   const [description, setdescription] = React.useState();
-  React.useEffect(async () => {
+  React.useEffect(() => {
     // setValues({ ...values, ["owner"]: localStorage.getItem("user").id });
-    const response = await fetch(API_URL + "/subcategories", {
-      method: "GET",
-      headers: new Headers({
-        Accept: "application/json",
-      }),
-    });
-    let result = await response.json();
-    setCategories(result);
-
-    const product_response = await fetch(API_URL + "/products/" + props.id, {
-      method: "GET",
-      headers: new Headers({
-        Accept: "application/json",
-      }),
-    });
-    let product = await product_response.json();
-    if (product) {
-      setValues({
-        name: product.name,
-        price: product.price,
-        category: product.category.id,
+    async function getSubCategories() {
+      const response = await fetch(API_URL + "/subcategories", {
+        method: "GET",
+        headers: new Headers({
+          Accept: "application/json",
+        }),
       });
-      setdescription(product.description);
-      const file = new File([product.image], "image");
-      setFiles(file);
-    } else {
-      // ---------------
-      // DONOT SHOW FORM
-      // ---------------
+      let result = await response.json();
+      setCategories(result);
     }
+    getSubCategories();
+    async function getProduct() {
+      const product_response = await fetch(API_URL + "/products/" + props.id, {
+        method: "GET",
+        headers: new Headers({
+          Accept: "application/json",
+        }),
+      });
+      let product = await product_response.json();
+      if (product) {
+        setValues({
+          name: product.name.en,
+          name_de: product.name.de,
+          price: product.price,
+          category: product.category._id,
+        });
+        setdescription(product.description);
+        const file = new File([product.image], "image");
+        setFiles(file);
+      } else {
+        // ---------------
+        // DONOT SHOW FORM
+        // ---------------
+      }
+    }
+    getProduct();
   }, []);
 
   const handleChange = (prop) => (event) => {
@@ -85,9 +94,9 @@ export default function ProductEdit(props) {
 
   const handleSubmit = (event) => {
     setError(null);
-
     const formData = new FormData();
     formData.append("name", values.name);
+    formData.append("name_de", values.name_de);
     formData.append("price", values.price);
     formData.append("category", values.category);
     formData.append("description", description);
@@ -138,44 +147,70 @@ export default function ProductEdit(props) {
           </Alert>
         )}
         <form onSubmit={handleSubmit}>
-          <FormControl fullWidth className={classes.margin}>
-            <InputLabel htmlFor="standard-adornment-amount">
-              Product Name
-            </InputLabel>
-            <Input
-              id="name"
-              name="name"
-              value={values.name}
-              onChange={handleChange("name")}
-            />
-          </FormControl>
-          <FormControl fullWidth className={classes.margin}>
-            <InputLabel htmlFor="standard-adornment-amount">Price</InputLabel>
-            <Input
-              id="price"
-              name="price"
-              value={values.price}
-              type="number"
-              onChange={handleChange("price")}
-            />
-          </FormControl>
-          <FormControl class="cat-control">
-            <TextField
-              id="standard-select-category"
-              select
-              label="Select Category"
-              value={values.category}
-              onChange={handleChangeCategory}
-              helperText="Please select your category"
-            >
-              {categories.map((option) => (
-                <MenuItem key={option.id} value={option.id}>
-                  {option.name}
-                </MenuItem>
-              ))}
-            </TextField>
-          </FormControl>
-
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <FormControl fullWidth className={classes.margin}>
+                <InputLabel htmlFor="name">Product Name</InputLabel>
+                <Input
+                  id="name"
+                  name="name"
+                  value={values.name}
+                  onChange={handleChange("name")}
+                />
+              </FormControl>
+            </Grid>
+            <Grid item xs={6}>
+              <FormControl fullWidth className={classes.margin}>
+                <InputLabel htmlFor="name_de">
+                  Product Name in German
+                </InputLabel>
+                <Input
+                  id="name_de"
+                  name="name_de"
+                  value={values.name_de}
+                  onChange={handleChange("name_de")}
+                />
+              </FormControl>
+            </Grid>
+          </Grid>
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <FormControl fullWidth className={classes.margin}>
+                <InputLabel htmlFor="standard-adornment-amount">
+                  Price
+                </InputLabel>
+                <Input
+                  id="price"
+                  name="price"
+                  value={values.price}
+                  type="number"
+                  onChange={handleChange("price")}
+                />
+              </FormControl>
+            </Grid>
+            <Grid item xs={6}>
+              <FormControl class="cat-control">
+                <TextField
+                  id="category"
+                  select
+                  label="Select Category"
+                  value={values.category}
+                  onChange={handleChangeCategory}
+                  helperText="Please select your category"
+                >
+                  {categories.map((option) => (
+                    <MenuItem
+                      key={option._id}
+                      value={option._id}
+                      selected={option._id === values.category}
+                    >
+                      {option.name[locale]}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </FormControl>
+            </Grid>
+          </Grid>
           <FormControl fullWidth>
             <label class="desc-label" htmlFor="description">
               Description
@@ -208,7 +243,7 @@ export default function ProductEdit(props) {
               variant="contained"
               color="primary"
             >
-              Create Product
+              Edit Product
             </Button>
           </FormControl>
         </form>

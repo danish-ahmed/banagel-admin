@@ -8,14 +8,12 @@ const subCategorySchema = new mongoose.Schema({
     required: true,
     minlength: 4,
     maxlength: 50,
+    intl: true,
   },
   category: {
     type: categorySchema,
     required: true,
   },
-});
-subCategorySchema.set("toJSON", {
-  virtuals: true,
 });
 
 const SubCategory = mongoose.model("SubCategory", subCategorySchema);
@@ -23,6 +21,7 @@ const SubCategory = mongoose.model("SubCategory", subCategorySchema);
 function validateCategory(genre) {
   const schema = {
     name: Joi.string().min(4).max(50).required(),
+    name_de: Joi.string().min(4).max(50).required(),
     category: Joi.objectId().required(),
   };
 
