@@ -10,8 +10,24 @@ const express = require("express");
 const router = express.Router();
 const upload = require("../middleware/fileUpload");
 
-router.get("/", async (req, res) => {
+router.get("/", [auth], async (req, res) => {
   //All Products for admin
+  if (req.user.role == "member") {
+    const user_shop = await Shop.findOne()
+      .where({ owner: req.user._id })
+      .sort("name");
+    console.log(user_shop);
+    const shopproducts = await ShopProduct.find()
+      .where({ shop: user_shop })
+      .select("-__v")
+      .sort("name");
+    res.range({
+      first: req.range.first,
+      last: req.range.last,
+      length: shopproducts.length,
+    });
+    res.send(shopproducts.slice(req.range.first, req.range.last + 1));
+  }
   const shopproducts = await ShopProduct.find().select("-__v").sort("name");
 
   //Pagination

@@ -57,28 +57,8 @@ const shopSchema = new mongoose.Schema({
     default: Date.now,
   },
   owner: {
-    type: new mongoose.Schema({
-      firstname: {
-        type: String,
-        minlength: 2,
-        maxlength: 50,
-      },
-      lastname: {
-        type: String,
-        minlength: 2,
-        maxlength: 50,
-      },
-      email: {
-        type: String,
-        minlength: 5,
-        maxlength: 255,
-      },
-      isVerified: {
-        type: Boolean,
-        default: false,
-      },
-    }),
-    required: true,
+    type: Schema.Types.ObjectId,
+    ref: "User",
   },
 });
 

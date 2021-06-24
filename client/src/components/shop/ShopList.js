@@ -24,11 +24,12 @@ const ShopList = (props) => {
         <TextField source="address" />
         <ImageField source="filename" title="shopname" label="Image" />
         <TextField source="owner.firstname" label="Owner" />
-        {props.permissions === "member" && (
+        <EditButton basePath="/shops" label="Edit" />
+        <ShowButton basePath="/shops" label="Show" />
+
+        {props.permissions === "admin" && (
           <>
-            <EditButton basePath="/shops" label="Edit" />
             <DeleteButton basePath="/shops" label="Delete" />
-            <ShowButton basePath="/shops" label="Show" />
           </>
         )}
       </Datagrid>

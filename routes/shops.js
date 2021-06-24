@@ -10,6 +10,7 @@ const router = express.Router();
 const range = require("express-range");
 const upload = require("../middleware/fileUpload");
 const _ = require("lodash");
+
 router.get("/:id", validateObjectId, async (req, res) => {
   const shop = await Shop.findById(req.params.id).select("-__v");
 
@@ -18,6 +19,7 @@ router.get("/:id", validateObjectId, async (req, res) => {
 
   res.send(shop);
 });
+
 router.get("/", [auth], async (req, res) => {
   // Members shops
   // const filters = JSON.parse(req.query.filter);
@@ -27,9 +29,11 @@ router.get("/", [auth], async (req, res) => {
   //     : null;
   // }
   if (req.user.role !== "admin") {
+    const user = User.findById(req.user._id);
     const shops = await Shop.find()
-      .where({ owner: req.user })
+      .where({ owner: req.user._id })
       .select("-__v")
+      .populate("owner")
       .sort("name");
     res.range({
       first: req.range.first,
@@ -42,6 +46,7 @@ router.get("/", [auth], async (req, res) => {
   const shops = await Shop.find()
     // .where({ ...filters })
     .select("-__v")
+    .populate("owner")
     .sort("name");
 
   //Pagination
@@ -80,7 +85,7 @@ router.post("/", [auth, upload], async (req, res) => {
     shopname: shopname,
     address: req.body.address,
     commercialID: req.body.commercialID,
-    owner: _.pick(user, "_id", "firstname", "lastname", "email"),
+    owner: user,
     category: category,
     phone: req.body.phone,
     publishDate: moment().toJSON(),
@@ -118,7 +123,7 @@ router.put("/:id", [auth, upload], async (req, res) => {
         shopname: shopname,
         address: req.body.address,
         commercialID: req.body.commercialID,
-        owner: _.pick(user, "_id", "firstname", "lastname", "email"),
+        owner: user,
         category: category,
         phone: req.body.phone,
         publishDate: moment().toJSON(),
