@@ -8,10 +8,18 @@ const LocaleSwitcher = () => {
   const setLocale = useSetLocale();
   return (
     <div>
-      <Button disabled={locale === "de"} onClick={() => setLocale("de")}>
+      <Button
+        variant="outlined"
+        disabled={locale === "de"}
+        onClick={() => setLocale("de")}
+      >
         DE
       </Button>
-      <Button disabled={locale === "en"} onClick={() => setLocale("en")}>
+      <Button
+        variant="outlined"
+        disabled={locale === "en"}
+        onClick={() => setLocale("en")}
+      >
         EN
       </Button>
     </div>

@@ -1,6 +1,6 @@
 const { Shop, validate } = require("../models/shop");
 const { User } = require("../models/user");
-const { Category, categorySchema } = require("../models/category");
+const { Segment, segmentSchema } = require("../models/segment");
 const auth = require("../middleware/auth");
 const admin = require("../middleware/admin");
 const validateObjectId = require("../middleware/validateObjectId");
@@ -65,8 +65,8 @@ router.post("/", [auth, upload], async (req, res) => {
   const user = await User.findById(req.body.owner);
   if (!user) return res.status(400).send("Invalid User.");
 
-  const category = await Category.findById(req.body.category);
-  if (!category) return res.status(400).send("Invalid Shop Category.");
+  const segment = await Segment.findById(req.body.segment);
+  if (!segment) return res.status(400).send("Invalid Segment.");
   const _file = req.file;
 
   if (!_file) {
@@ -86,7 +86,7 @@ router.post("/", [auth, upload], async (req, res) => {
     address: req.body.address,
     commercialID: req.body.commercialID,
     owner: user,
-    category: category,
+    segment: segment,
     phone: req.body.phone,
     publishDate: moment().toJSON(),
     filename:
@@ -108,8 +108,8 @@ router.put("/:id", [auth, upload], async (req, res) => {
   const user = await User.findById(req.body.owner);
   if (!user) return res.status(400).send("Invalid User.");
 
-  const category = await Category.findById(req.body.category);
-  if (!category) return res.status(400).send("Invalid Shop Category.");
+  const segment = await Segment.findById(req.body.segment);
+  if (!segment) return res.status(400).send("Invalid Shop Segment.");
 
   const shopname = {
     en: req.body.shopname,
@@ -123,8 +123,8 @@ router.put("/:id", [auth, upload], async (req, res) => {
         shopname: shopname,
         address: req.body.address,
         commercialID: req.body.commercialID,
-        owner: user,
-        category: category,
+        // owner: user,
+        segment: segment,
         phone: req.body.phone,
         publishDate: moment().toJSON(),
         filename:
@@ -148,7 +148,7 @@ router.put("/:id", [auth, upload], async (req, res) => {
         address: req.body.address,
         commercialID: req.body.commercialID,
         owner: _.pick(user, "_id", "firstname", "lastname", "email"),
-        category: category,
+        segment: segment,
         phone: req.body.phone,
         publishDate: moment().toJSON(),
       },
@@ -173,10 +173,10 @@ router.delete("/:id", [auth, admin], async (req, res) => {
 router.get("/:id", validateObjectId, async (req, res) => {
   const shop = await Movie.findById(req.params.id).select("-__v");
 
-  if (!movie)
+  if (!shop)
     return res.status(404).send("The movie with the given ID was not found.");
 
-  res.send(movie);
+  res.send(shop);
 });
 
 module.exports = router;

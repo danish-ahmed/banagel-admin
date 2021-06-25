@@ -27,16 +27,17 @@ router.post("/", [auth, admin], async (req, res) => {
   res.send(subcategory);
 });
 router.put("/:id", [auth, admin, validateObjectId], async (req, res) => {
-  const { error } = validate(req.body);
+  // const { error } = validate(req.body);
+  const { error } = validate({
+    name: req.body.name.en,
+    name_de: req.body.name.de,
+  });
   if (error) return res.status(400).send(error.details[0].message);
-  const name = {
-    en: req.body.name,
-    de: req.body.name_de,
-  };
+
   const subcategory = await Category.findByIdAndUpdate(
     req.params.id,
     {
-      name: name,
+      name: req.body.name,
       category: { _id: category._id, name: category.name },
     },
     {

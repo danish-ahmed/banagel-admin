@@ -63,7 +63,7 @@ export default function ShopCreate(props) {
   React.useEffect(() => {
     // setValues({ ...values, ["owner"]: localStorage.getItem("user").id });
     async function getData() {
-      const response = await fetch(API_URL + "/categories", {
+      const response = await fetch(API_URL + "/segments", {
         method: "GET",
         headers: new Headers({
           Accept: "application/json",
@@ -121,7 +121,7 @@ export default function ShopCreate(props) {
         formData.append("commercialID", values.commercialID);
         formData.append("owner", data._id);
         formData.append("phone", values.phone);
-        formData.append("category", values.category);
+        formData.append("segment", values.category);
         formData.append("file", files[0]);
         fetch(API_URL + "/shops", {
           method: "POST",
@@ -263,6 +263,7 @@ export default function ShopCreate(props) {
               onChange={handleChange("address")}
             />
           </FormControl>
+
           <FormControl fullWidth className={classes.margin}>
             <InputLabel htmlFor="commercialID">Commercial ID</InputLabel>
             <Input
@@ -282,20 +283,22 @@ export default function ShopCreate(props) {
               onChange={handleChangePhone}
             />
           </FormControl>
-          <TextField
-            id="category"
-            select
-            label="Select"
-            value={values.category}
-            onChange={handleChangeCategory}
-            helperText="Please select your category"
-          >
-            {categories.map((option) => (
-              <MenuItem key={option._id} value={option._id}>
-                {option.name[locale]}
-              </MenuItem>
-            ))}
-          </TextField>
+          <FormControl className={classes.margin}>
+            <TextField
+              id="category"
+              select
+              label="Select Segment"
+              value={values.category}
+              onChange={handleChangeCategory}
+              helperText="Please select your Segment"
+            >
+              {categories.map((option) => (
+                <MenuItem key={option._id} value={option._id}>
+                  {option.name[locale]}
+                </MenuItem>
+              ))}
+            </TextField>
+          </FormControl>
           <FormControl fullWidth>
             <DropzoneArea
               acceptedFiles={["image/*"]}

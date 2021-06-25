@@ -7,6 +7,7 @@ const shops = require("../routes/shops");
 const products = require("../routes/products");
 const shopProducts = require("../routes/shopProducts");
 // const rentals = require("../routes/rentals");
+const segments = require("../routes/segments");
 const users = require("../routes/users");
 const auth = require("../routes/auth");
 // const returns = require("../routes/returns");
@@ -16,6 +17,7 @@ module.exports = function (app) {
   app.use(express.json());
   app.use("/api/categories", categories);
   app.use("/api/tags", tags);
+  app.use("/api/segments", segments);
   app.use("/api/subcategories", subcategories);
   app.use("/api/customers", customers);
   app.use("/api/shops", shops);

@@ -56,7 +56,7 @@ export default function ShopEdit(props) {
   React.useEffect(() => {
     // setValues({ ...values, ["owner"]: localStorage.getItem("user").id });
     async function getCategories() {
-      const response = await fetch(API_URL + "/categories", {
+      const response = await fetch(API_URL + "/segments", {
         method: "GET",
         headers: new Headers({
           Accept: "application/json",
@@ -79,7 +79,7 @@ export default function ShopEdit(props) {
           shopname: shop.shopname.en,
           shopname_de: shop.shopname.de,
           address: shop.address,
-          category: shop.category._id,
+          category: shop.segment._id,
           owner: shop.owner._id,
           commercialID: shop.commercialID,
           filename: shop.filename,
@@ -112,7 +112,7 @@ export default function ShopEdit(props) {
     formData.append("commercialID", values.commercialID);
     formData.append("owner", decodeJwt(localStorage.getItem("token"))._id);
     formData.append("phone", values.phone);
-    formData.append("category", values.category);
+    formData.append("segment", values.category);
     formData.append("file", files[0]);
     setError("");
     fetch(API_URL + "/shops/" + props.id, {
@@ -186,7 +186,7 @@ export default function ShopEdit(props) {
             </Grid>
           </Grid>
           <FormControl fullWidth className={classes.margin}>
-            <InputLabel htmlFor="standard-adornment-amount">Address</InputLabel>
+            <InputLabel htmlFor="address">Address</InputLabel>
             <Input
               id="address"
               name="address"
@@ -195,9 +195,7 @@ export default function ShopEdit(props) {
             />
           </FormControl>
           <FormControl fullWidth className={classes.margin}>
-            <InputLabel htmlFor="standard-adornment-amount">
-              Commercial ID
-            </InputLabel>
+            <InputLabel htmlFor="address">Commercial ID</InputLabel>
             <Input
               id="commercialID"
               name="commercialID"
@@ -209,30 +207,32 @@ export default function ShopEdit(props) {
             <MuiPhoneInput
               defaultCountry="de"
               regions={"europe"}
-              helperText="Please select your Phone"
+              helperText="Enter Phone"
               name="phone"
               value={values.phone}
               onChange={handleChangePhone}
             />
           </FormControl>
-          <TextField
-            id="standard-select-category"
-            select
-            label="Select"
-            value={values.category}
-            onChange={handleChangeCategory}
-            helperText="Please select your currency"
-          >
-            {categories.map((option) => (
-              <MenuItem
-                key={option._id}
-                value={option._id}
-                selected={option._id === values.category}
-              >
-                {option.name[locale]}
-              </MenuItem>
-            ))}
-          </TextField>
+          <FormControl className={classes.margin}>
+            <TextField
+              id="category"
+              select
+              label="Select"
+              value={values.category}
+              onChange={handleChangeCategory}
+              helperText="Please select your currency"
+            >
+              {categories.map((option) => (
+                <MenuItem
+                  key={option._id}
+                  value={option._id}
+                  selected={option._id === values.category}
+                >
+                  {option.name[locale]}
+                </MenuItem>
+              ))}
+            </TextField>
+          </FormControl>
           <FormControl fullWidth>
             <DropzoneArea
               acceptedFiles={["image/*"]}

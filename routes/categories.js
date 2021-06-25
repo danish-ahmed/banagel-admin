@@ -21,12 +21,16 @@ router.post("/", [auth, admin], async (req, res) => {
   res.send(category);
 });
 router.put("/:id", [auth, admin, validateObjectId], async (req, res) => {
-  const { error } = validate(req.body);
+  // const { error } = validate(req.body);
+  const { error } = validate({
+    name: req.body.name.en,
+    name_de: req.body.name.de,
+  });
   if (error) return res.status(400).send(error.details[0].message);
 
   const category = await Category.findByIdAndUpdate(
     req.params.id,
-    { name: { en: req.body.name, de: req.body.name_de } },
+    { name: req.body.name },
     {
       new: true,
     }

@@ -1,6 +1,6 @@
 const Joi = require("joi");
 const mongoose = require("mongoose");
-const { categorySchema } = require("./category");
+const { segmentSchema } = require("./segment");
 const { userSchema } = require("./user");
 const Schema = mongoose.Schema;
 
@@ -48,8 +48,8 @@ const shopSchema = new mongoose.Schema({
     minlength: 2,
     maxlength: 15,
   },
-  category: {
-    type: categorySchema,
+  segment: {
+    type: segmentSchema,
     required: true,
   },
   publishDate: {
@@ -73,7 +73,7 @@ function validateShop(shop) {
     phone: Joi.string().min(2).max(20).required(),
     owner: Joi.objectId().required(),
     file: Joi.optional(),
-    category: Joi.objectId().required(),
+    segment: Joi.objectId().required(),
   };
 
   return Joi.validate(shop, schema);

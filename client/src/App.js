@@ -27,6 +27,9 @@ import CategoriesCreate from "./components/categories/CategoriesCreate";
 import { API_URL } from "./config";
 import MyDataProvider from "./MyDataProvider";
 import ShopProductEdit from "./components/shopProducts/ShopProductEdit";
+import SegmentList from "./components/segments/SegmentList";
+import SegmentCreate from "./components/segments/SegmentCreate";
+import SegmentEdit from "./components/segments/SegmentEdit";
 function App() {
   const [permission, setPermissions] = useState("");
 
@@ -50,8 +53,16 @@ function App() {
         label="Shop"
         show={ShopShow}
         list={ShopList}
-        edit={ShopEdit}
+        edit={permission == "edit" ? ShopEdit : null}
         create={permission === "admin" ? ShopCreate : null}
+      />
+      <Resource
+        name="segments"
+        label="Segments"
+        permission={authProvider.getPermissions()}
+        list={SegmentList}
+        edit={permission === "admin" ? SegmentEdit : null}
+        create={permission === "admin" ? SegmentCreate : null}
       />
       <Resource
         name="categories"

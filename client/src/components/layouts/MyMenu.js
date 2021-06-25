@@ -21,6 +21,11 @@ const MyMenu = ({ onMenuClick, logout }) => {
       <DashboardMenuItem onClick={onMenuClick} sidebarIsOpen={open} />
       <MenuItemLink to="/shops" primaryText="Shops" leftIcon={<ShopIcon />} />
       <MenuItemLink
+        to="/segments"
+        primaryText="Segments"
+        leftIcon={<CategoryIcon />}
+      />
+      <MenuItemLink
         to="/categories"
         primaryText="Categories"
         leftIcon={<CategoryIcon />}
