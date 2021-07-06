@@ -7,12 +7,57 @@ const moment = require("moment");
 const express = require("express");
 const router = express.Router();
 const upload = require("../middleware/fileUpload");
+const { User } = require("../models/user");
+const { Shop } = require("../models/shop");
+const { Category } = require("../models/category");
 
 router.get("/", async (req, res) => {
   //All Products for admin
-  const products = await Product.find().select("-__v").sort("name");
+  if (req.query.filter) {
+    const filters = JSON.parse(req.query.filter);
+    if (filters.name) {
+      const lang = req.headers.language;
+      filters[`name.${lang}`] = filters.name;
+      delete filters.name;
+    }
 
-  //Pagination
+    const products = await Product.find()
+      .where({ ...filters })
+      .select("-__v")
+      .sort("name");
+
+    //Pagination
+    res.range({
+      first: req.range.first,
+      last: req.range.last,
+      length: products.length,
+    });
+    res.send(products.slice(req.range.first, req.range.last + 1));
+  } else {
+    const products = await Product.find().select("-__v").sort("name");
+
+    //Pagination
+    res.range({
+      first: req.range.first,
+      last: req.range.last,
+      length: products.length,
+    });
+    res.send(products.slice(req.range.first, req.range.last + 1));
+  }
+});
+
+router.get("/shop", [auth], async (req, res) => {
+  const shop = await Shop.findOne()
+    .where({ owner: req.user._id })
+    .select("-__v")
+    .populate("owner")
+    .sort("name");
+  const category = await Category.find({ segment: shop.segment });
+  const products = await Product.find({
+    ["category.category"]: category,
+  })
+    .select("-__v")
+    .sort("name");
   res.range({
     first: req.range.first,
     last: req.range.last,
@@ -20,11 +65,11 @@ router.get("/", async (req, res) => {
   });
   res.send(products.slice(req.range.first, req.range.last + 1));
 });
+
 router.get("/:id", validateObjectId, async (req, res) => {
   const product = await Product.findById(req.params.id).select("-__v");
 
-  if (!product)
-    return res.status(404).send("The genre with the given ID was not found.");
+  if (!product) return res.status(404).send("The Product not found");
 
   res.send(product);
 });

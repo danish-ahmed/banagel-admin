@@ -1,5 +1,6 @@
 const Joi = require("joi");
 const mongoose = require("mongoose");
+const { segmentSchema } = require("./segment");
 
 const categorySchema = new mongoose.Schema({
   name: {
@@ -8,6 +9,10 @@ const categorySchema = new mongoose.Schema({
     minlength: 4,
     maxlength: 50,
     intl: true,
+  },
+  segment: {
+    type: segmentSchema,
+    required: true,
   },
 });
 
@@ -19,6 +24,7 @@ function validateCategory(genre) {
   const schema = {
     name: Joi.string().min(4).max(50).required(),
     name_de: Joi.string().min(4).max(50).required(),
+    segment: Joi.objectId().required(),
   };
 
   return Joi.validate(genre, schema);

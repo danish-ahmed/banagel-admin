@@ -9,6 +9,9 @@ const moment = require("moment");
 const express = require("express");
 const router = express.Router();
 const upload = require("../middleware/fileUpload");
+const { Segment } = require("../models/segment");
+const { Category } = require("../models/category");
+const { filter } = require("lodash");
 
 router.get("/", [auth], async (req, res) => {
   //All Products for admin
@@ -81,6 +84,7 @@ router.post("/", [upload], async (req, res) => {
       discountEndDate: req.body.discount_end_date,
     };
   }
+  console.log(shop);
   const shopproduct = new ShopProduct({
     shop: shop,
     name: { en: req.body.name, de: req.body.name_de },
@@ -166,6 +170,85 @@ router.delete("/:id", [auth], async (req, res) => {
     return res.status(404).send("The Shop with the given ID was not found.");
 
   res.send(shopproduct);
+});
+
+router.get("/segment/:id", [validateObjectId], async (req, res) => {
+  //All Products for admin
+  const segment = await Segment.findById(req.params.id);
+  if (!segment) return res.status(400).send("Invalid Segment ID.");
+  const shops = await Shop.find().where({ segment });
+  const shopproducts = await ShopProduct.find()
+    .where("shop")
+    .in(shops)
+    .select("-__v")
+    .sort("name");
+
+  res.send({ segment: segment._id, data: shopproducts });
+});
+
+router.get("/segment-page/:id", [validateObjectId], async (req, res) => {
+  //All Products for admin
+  const filters = JSON.parse(req.query.filters);
+  const segment = await Segment.findById(req.params.id);
+  if (!segment) return res.status(400).send("Invalid Segment ID.");
+  const subcategories = await SubCategory.find()
+    .where({ ["category.segment"]: segment })
+    .select("-__v")
+    .sort("name");
+  const shops = await Shop.find().where({ segment });
+  if (filters) {
+    if (filters.subcategory && filters.subcategory.length > 0) {
+      const shopproducts = await ShopProduct.find()
+        .where({
+          shop:
+            filters.shop && filters.shop.length > 0
+              ? await Shop.find({ _id: filters.shop })
+              : shops,
+          ["category"]:
+            filters.subcategory && filters.subcategory.length > 0
+              ? await SubCategory.find({ _id: filters.subcategory })
+              : null,
+        })
+        .select("-__v")
+        .sort("name");
+      console.log(await SubCategory.find({ _id: filters.subcategory }));
+      return res.send({
+        segment: segment._id,
+        segmentData: segment,
+        shops: shops,
+        data: shopproducts,
+        subcategories,
+      });
+    }
+    const shopproducts = await ShopProduct.find()
+      .where({
+        shop:
+          filters.shop && filters.shop.length > 0
+            ? await Shop.find({ _id: filters.shop })
+            : shops,
+      })
+      .select("-__v")
+      .sort("name");
+    return res.send({
+      segment: segment._id,
+      segmentData: segment,
+      shops: shops,
+      data: shopproducts,
+      subcategories,
+    });
+  } else {
+    const shopproducts = await ShopProduct.find()
+      .where({ shop: shops })
+      .select("-__v")
+      .sort("name");
+    return res.send({
+      segment: segment._id,
+      segmentData: segment,
+      shops: shops,
+      data: shopproducts,
+      subcategories,
+    });
+  }
 });
 
 // router.put("/:id", [validateObjectId, upload], async (req, res) => {

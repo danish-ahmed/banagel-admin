@@ -10,10 +10,11 @@ export default function ProductSelect(props) {
   React.useEffect(() => {
     // setValues({ ...values, ["owner"]: localStorage.getItem("user").id });
     async function getData() {
-      const response = await fetch(API_URL + "/products", {
+      const response = await fetch(API_URL + "/products/shop", {
         method: "GET",
         headers: new Headers({
           Accept: "application/json",
+          "x-auth-token": localStorage.getItem("token"),
         }),
       });
       let result = await response.json();

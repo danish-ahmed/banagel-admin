@@ -15,21 +15,21 @@ router.get("/:id", validateObjectId, async (req, res) => {
   const shop = await Shop.findById(req.params.id).select("-__v");
 
   if (!shop)
-    return res.status(404).send("The genre with the given ID was not found.");
+    return res.status(404).send("The Shop with the given ID was not found.");
 
   res.send(shop);
 });
 
 router.get("/", [auth], async (req, res) => {
   // Members shops
-  // const filters = JSON.parse(req.query.filter);
-  // if (filters) {
-  //   filters.shopname
-  //     ? (filters.shopname = "/" + filters.shopname.replace(/['"]+/g, "") + "/")
-  //     : null;
-  // }
+  const filters = JSON.parse(req.query.filter);
+  if (filters.name) {
+    const lang = req.headers.language;
+    filters[`shopname.${lang}`] = filters.name;
+    delete filters.name;
+  }
   if (req.user.role !== "admin") {
-    const user = User.findById(req.user._id);
+    // const user = User.findById(req.user._id);
     const shops = await Shop.find()
       .where({ owner: req.user._id })
       .select("-__v")
@@ -44,7 +44,7 @@ router.get("/", [auth], async (req, res) => {
   }
   //All Shops for admin
   const shops = await Shop.find()
-    // .where({ ...filters })
+    .where({ ...filters })
     .select("-__v")
     .populate("owner")
     .sort("name");

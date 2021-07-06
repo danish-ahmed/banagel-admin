@@ -15,8 +15,9 @@ const SubCategoriesList = (props) => {
     <List {...props}>
       <Datagrid>
         <TextField source="_id" />
-        <TextField source={`category.name.${locale}`} label="Main Category" />
-        <TextField source={`name.${locale}`} label="Category" />
+        <TextField source={`category.segment.name.${locale}`} label="Segment" />
+        <TextField source={`category.name.${locale}`} label="Category" />
+        <TextField source={`name.${locale}`} label="SubCategory Name" />
         {props.permissions === "admin" && (
           <EditButton basePath="/subcategories" label="Edit" />
         )}

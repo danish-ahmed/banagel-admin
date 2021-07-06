@@ -15,10 +15,10 @@ export default function SubCategoriesEdit(props) {
         <TextInput source="name.de" lable="Name in German" />
         <ReferenceInput
           label="Category"
-          source="category._id"
+          source="category"
           reference="categories"
         >
-          <SelectInput optionText="name.en" optionValue="id" allowEmpty />
+          <SelectInput optionText="name.en" />
         </ReferenceInput>
       </SimpleForm>
     </Edit>

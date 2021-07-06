@@ -3,18 +3,29 @@ const auth = require("../middleware/auth");
 const admin = require("../middleware/admin");
 const { Category, validate } = require("../models/category");
 const express = require("express");
+const { Segment } = require("../models/segment");
 const router = express.Router();
 
 router.get("/", async (req, res) => {
   const category = await Category.find().select("-__v").sort("name");
-  res.send(category);
+  res.range({
+    first: req.range.first,
+    last: req.range.last,
+    length: category.length,
+  });
+  res.send(category.slice(req.range.first, req.range.last + 1));
 });
 router.post("/", [auth, admin], async (req, res) => {
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
+  const segment = await Segment.findById(req.body.segment);
+  if (!segment)
+    return res.status(404).send("The Segment with the given ID was not found.");
+
   let category = new Category({
     name: { en: req.body.name, de: req.body.name_de },
+    segment: segment,
   });
   category = await category.save();
 
@@ -25,12 +36,18 @@ router.put("/:id", [auth, admin, validateObjectId], async (req, res) => {
   const { error } = validate({
     name: req.body.name.en,
     name_de: req.body.name.de,
+    segment: req.body.segment,
   });
   if (error) return res.status(400).send(error.details[0].message);
 
+  const segment = await Segment.findById(req.body.segment);
+  if (!segment)
+    return res.status(404).send("The Segment with the given ID was not found.");
+
   const category = await Category.findByIdAndUpdate(
     req.params.id,
-    { name: req.body.name },
+    { name: req.body.name, segment },
+
     {
       new: true,
     }

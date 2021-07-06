@@ -8,12 +8,21 @@ const router = express.Router();
 
 router.get("/", async (req, res) => {
   const subcategory = await SubCategory.find().select("-__v").sort("name");
-  res.send(subcategory);
+  res.range({
+    first: req.range.first,
+    last: req.range.last,
+    length: subcategory.length,
+  });
+  res.send(subcategory.slice(req.range.first, req.range.last + 1));
 });
 router.post("/", [auth, admin], async (req, res) => {
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
   const category = await Category.findById(req.body.category);
+  if (!category)
+    return res
+      .status(404)
+      .send("The Category with the given ID was not found.");
   const name = {
     en: req.body.name,
     de: req.body.name_de,
@@ -28,17 +37,23 @@ router.post("/", [auth, admin], async (req, res) => {
 });
 router.put("/:id", [auth, admin, validateObjectId], async (req, res) => {
   // const { error } = validate(req.body);
+  console.log(req.params.id);
   const { error } = validate({
     name: req.body.name.en,
     name_de: req.body.name.de,
+    category: req.body.category,
   });
   if (error) return res.status(400).send(error.details[0].message);
-
-  const subcategory = await Category.findByIdAndUpdate(
+  const category = await Category.findById(req.body.category);
+  if (!category)
+    return res
+      .status(404)
+      .send("The Category with the given ID was not found.");
+  const subcategory = await SubCategory.findByIdAndUpdate(
     req.params.id,
     {
       name: req.body.name,
-      category: { _id: category._id, name: category.name },
+      category,
     },
     {
       new: true,
@@ -48,7 +63,7 @@ router.put("/:id", [auth, admin, validateObjectId], async (req, res) => {
   if (!subcategory)
     return res
       .status(404)
-      .send("The Category with the given ID was not found.");
+      .send("The SubCategory with the given ID was not found.");
 
   res.send(subcategory);
 });

@@ -14,7 +14,8 @@ const CategoriesList = (props) => {
     <List {...props}>
       <Datagrid>
         <TextField source="id" />
-        <TextField source={`name.${locale}`} label="Name" />
+        <TextField source={`segment.name.${locale}`} label="Segment" />
+        <TextField source={`name.${locale}`} label="Category Name" />
         {props.permissions === "admin" && (
           <EditButton basePath="/categories" label="Edit" />
         )}

@@ -11,14 +11,20 @@ const LocaleSwitcher = () => {
       <Button
         variant="outlined"
         disabled={locale === "de"}
-        onClick={() => setLocale("de")}
+        onClick={() => {
+          setLocale("de");
+          localStorage.setItem("language", "de");
+        }}
       >
         DE
       </Button>
       <Button
         variant="outlined"
         disabled={locale === "en"}
-        onClick={() => setLocale("en")}
+        onClick={() => {
+          setLocale("en");
+          localStorage.setItem("language", "en");
+        }}
       >
         EN
       </Button>

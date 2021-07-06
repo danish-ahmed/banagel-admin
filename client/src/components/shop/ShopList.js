@@ -9,17 +9,17 @@ import {
   useLocale,
   DeleteButton,
 } from "react-admin";
-
+import ShopFilter from "./ShopFilters";
 const ShopList = (props) => {
   const locale = useLocale();
-  const category = `category.name.${locale}`;
+  const segment = `segment.name.${locale}`;
   return (
-    <List {...props}>
+    <List {...props} aside={<ShopFilter />}>
       <Datagrid>
         {/* <TextField source="id" /> */}
         <TextField source={`shopname.${locale}`} label="Shopname" />
         <TextField source="commercialID" />
-        <TextField source={category} label="category" />
+        <TextField source={segment} label="Segment" />
         <TextField source="phone" />
         <TextField source="address" />
         <ImageField source="filename" title="shopname" label="Image" />

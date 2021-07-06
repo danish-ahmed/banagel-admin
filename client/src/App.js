@@ -32,7 +32,6 @@ import SegmentCreate from "./components/segments/SegmentCreate";
 import SegmentEdit from "./components/segments/SegmentEdit";
 function App() {
   const [permission, setPermissions] = useState("");
-
   useEffect(() => {
     authProvider
       .getPermissions()

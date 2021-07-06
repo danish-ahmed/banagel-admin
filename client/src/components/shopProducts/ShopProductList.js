@@ -24,17 +24,14 @@ const ShopProductList = (props) => {
         <BooleanField source="hasDiscount" />
         <TextField source="discount" />
         <ImageField source="image" title={`name[${locale}]`} label="Image" />
-        <TextField source={`category.name[${locale}]`} label="Segment" />
+        <TextField source={`category.name[${locale}]`} label="Category" />
         <TextField
           source={`category.category.name[${locale}]`}
-          label="Category"
+          label="SubCategory"
         />
-        {props.permissions === "member" && (
-          <>
-            <EditButton basePath="/shop-products" label="Edit" />
-            <DeleteButton basePath="/shop-products" label="Delete" />
-          </>
-        )}
+
+        <EditButton basePath="/shop-products" label="Edit" />
+        <DeleteButton basePath="/shop-products" label="Delete" />
       </Datagrid>
     </List>
   );
