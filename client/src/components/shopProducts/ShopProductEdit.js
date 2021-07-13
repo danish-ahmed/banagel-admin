@@ -103,11 +103,11 @@ export default function ShopProductEdit(props) {
           ...values,
           ["name"]: shopproduct.name.en,
           ["name_de"]: shopproduct.name.de,
-          ["price"]: shopproduct.price,
+          ["price"]: shopproduct.actualPrice,
           ["VAT"]: shopproduct.VAT ? shopproduct.VAT : 0,
           ["shop"]: shopproduct.shop._id,
           ["category"]: shopproduct.category._id,
-          ["selectedTags"]: shopproduct.tags,
+          // ["selectedTags"]: shopproduct.tags,
           ["discount"]: shopproduct.discount ? shopproduct.discount : 0,
         });
         setHasDiscount(shopproduct.hasDiscount);

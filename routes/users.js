@@ -1,7 +1,7 @@
 const auth = require("../middleware/auth");
 const bcrypt = require("bcrypt");
 const _ = require("lodash");
-const { User, validate } = require("../models/user");
+const { User, validate, validatePassword } = require("../models/user");
 const { Shop } = require("../models/shop");
 const express = require("express");
 const router = express.Router();
@@ -18,6 +18,29 @@ router.get("/user-shop/:id", [auth, validateObjectId], async (req, res) => {
     return res.status(404).send("The genre with the given ID was not found.");
 
   res.send(shop);
+});
+router.get("/", [auth], async (req, res) => {
+  const user = await User.find({ _id: req.user._id }).select("-password");
+  res.send(user);
+});
+router.get("/:id", [auth], async (req, res) => {
+  const user = await User.findOne({ _id: req.params.id }).select("-password");
+  res.send(user);
+});
+
+router.put("/:id", async (req, res) => {
+  const { error } = validatePassword(req.body);
+  if (error) return res.status(400).send(error.details[0].message);
+  let user = await User.findOne({ _id: req.params.id });
+  if (!user) return res.status(400).send("User Not Found.");
+
+  user.name = req.body.name;
+  user.password = req.body.password;
+  const salt = await bcrypt.genSalt(10);
+  user.password = await bcrypt.hash(req.body.password, salt);
+  await user.save();
+  // const token = user.generateAuthToken();
+  res.send(_.pick(user, ["_id", "name", "email"]));
 });
 router.post("/", async (req, res) => {
   const { error } = validate(req.body);

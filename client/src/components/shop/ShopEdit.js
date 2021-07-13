@@ -8,6 +8,7 @@ import {
 } from "@material-ui/core";
 import TextField from "@material-ui/core/TextField";
 import decodeJwt from "jwt-decode";
+import GooglePlacesAutocomplete from "react-google-places-autocomplete";
 
 import { makeStyles } from "@material-ui/core/styles";
 import Card from "@material-ui/core/Card";
@@ -19,6 +20,8 @@ import { DropzoneArea } from "material-ui-dropzone";
 import MuiPhoneInput from "material-ui-phone-number";
 import { useLocale, showNotification } from "react-admin";
 import { API_URL } from "../../config";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -49,7 +52,10 @@ export default function ShopEdit(props) {
     owner: "",
     category: "",
   });
+  const [endescription, setEnDescription] = React.useState();
+  const [dedescription, setDeDescription] = React.useState();
   const [files, setFiles] = React.useState();
+  const [landingFiles, setLandingFiles] = React.useState();
   const [error, setError] = React.useState("");
 
   const [categories, setCategories] = React.useState([]);
@@ -85,6 +91,10 @@ export default function ShopEdit(props) {
           filename: shop.filename,
           phone: shop.phone,
         });
+        if (shop.description) {
+          setEnDescription(shop.description.en);
+          setDeDescription(shop.description.de);
+        }
       } else {
         // ---------------
         // DONOT SHOW FORM
@@ -104,6 +114,14 @@ export default function ShopEdit(props) {
   const handleChangeCategory = (event) => {
     setValues({ ...values, ["category"]: event.target.value });
   };
+  // const handleDrop = (acceptedFiles, rejectedFiles) => {
+  //   const file = acceptedFiles.find((f) => f);
+  //   var reader = new FileReader();
+  //   console.log(reader);
+
+  //   reader.readAsDataURL(file);
+  //   console.log(reader);
+  // };
   const handleSubmit = (event) => {
     const formData = new FormData();
     formData.append("shopname", values.shopname);
@@ -114,6 +132,9 @@ export default function ShopEdit(props) {
     formData.append("phone", values.phone);
     formData.append("segment", values.category);
     formData.append("file", files[0]);
+    formData.append("landingFile", landingFiles[0]);
+    formData.append("description_en", endescription);
+    formData.append("description_de", dedescription);
     setError("");
     fetch(API_URL + "/shops/" + props.id, {
       method: "PUT",
@@ -186,6 +207,7 @@ export default function ShopEdit(props) {
             </Grid>
           </Grid>
           <FormControl fullWidth className={classes.margin}>
+            <GooglePlacesAutocomplete apiKey="AIzaSyD6rVMNTv-mSSSJXTUxY-L-AchaxolKijs" />
             <InputLabel htmlFor="address">Address</InputLabel>
             <Input
               id="address"
@@ -233,12 +255,51 @@ export default function ShopEdit(props) {
               ))}
             </TextField>
           </FormControl>
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <label class="desc-label" htmlFor="description">
+                Description In English
+              </label>
+              <ReactQuill
+                theme="snow"
+                value={endescription}
+                name="description_en"
+                onChange={setEnDescription}
+                id="description"
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <label class="desc-label" htmlFor="description">
+                Description In English
+              </label>
+              <ReactQuill
+                theme="snow"
+                value={dedescription}
+                name="description_de"
+                onChange={setDeDescription}
+                id="description"
+              />
+            </Grid>
+          </Grid>
           <FormControl fullWidth>
+            <p>Logo Image</p>
             <DropzoneArea
               acceptedFiles={["image/*"]}
               filesLimit="1"
               dropzoneText={"Drag and drop an image here or click"}
               onChange={(files) => setFiles(files)}
+              name="filename"
+            />
+          </FormControl>
+          <p>Landing Image</p>
+          <FormControl fullWidth>
+            <DropzoneArea
+              acceptedFiles={["image/*"]}
+              id="landingImgae"
+              filesLimit="1"
+              // onDrop={handleDrop}
+              dropzoneText={"Drag and drop an image here or click"}
+              onChange={(files) => setLandingFiles(files)}
               name="filename"
             />
           </FormControl>

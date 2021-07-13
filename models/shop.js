@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const { segmentSchema } = require("./segment");
 const { userSchema } = require("./user");
 const Schema = mongoose.Schema;
+const geocoder = require("../startup/geocoder");
 
 const shopSchema = new mongoose.Schema({
   shopname: {
@@ -11,6 +12,10 @@ const shopSchema = new mongoose.Schema({
     trim: true,
     minlength: 5,
     maxlength: 255,
+    intl: true,
+  },
+  description: {
+    type: String,
     intl: true,
   },
   address: {
@@ -42,6 +47,12 @@ const shopSchema = new mongoose.Schema({
     minlength: 2,
     maxlength: 200,
   },
+  landingImage: {
+    type: String,
+    required: true,
+    minlength: 2,
+    maxlength: 200,
+  },
   commercialID: {
     type: String,
     required: true,
@@ -56,10 +67,24 @@ const shopSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+
   owner: {
     type: Schema.Types.ObjectId,
     ref: "User",
   },
+});
+
+shopSchema.pre("save", async function (next) {
+  const loc = await geocoder.geocode(this.address);
+  this.location = {
+    type: "Point",
+    coordinates: [loc[0].longitude, loc[0].latitude],
+    formattedAddress: loc[0].formattedAddress,
+  };
+
+  // Do not save address
+  // this.address = undefined;
+  next();
 });
 
 const Shop = mongoose.model("Shops", shopSchema);
@@ -68,11 +93,14 @@ function validateShop(shop) {
   const schema = {
     shopname: Joi.string().min(2).max(50).required(),
     shopname_de: Joi.string().min(2).max(50).required(),
+    description_en: Joi.string().optional(),
+    description_de: Joi.string().optional(),
     address: Joi.string().min(5).max(255).required(),
     commercialID: Joi.string().min(2).max(15).required(),
     phone: Joi.string().min(2).max(20).required(),
     owner: Joi.objectId().required(),
     file: Joi.optional(),
+    landingFile: Joi.optional(),
     segment: Joi.objectId().required(),
   };
 

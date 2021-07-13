@@ -52,9 +52,11 @@ router.get("/shop", [auth], async (req, res) => {
     .select("-__v")
     .populate("owner")
     .sort("name");
-  const category = await Category.find({ segment: shop.segment });
+  const category = await Category.find({
+    "segment._id": shop.segment._id,
+  }).select("_id");
   const products = await Product.find({
-    ["category.category"]: category,
+    ["category.category._id"]: category,
   })
     .select("-__v")
     .sort("name");

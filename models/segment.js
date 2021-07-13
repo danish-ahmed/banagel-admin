@@ -9,6 +9,9 @@ const segmentSchema = new mongoose.Schema({
     maxlength: 50,
     intl: true,
   },
+  description: {
+    type: String,
+  },
 });
 
 // Ensure virtual fields are serialised.
@@ -19,6 +22,7 @@ function validateSegment(genre) {
   const schema = {
     name: Joi.string().min(2).max(50).required(),
     name_de: Joi.string().min(2).max(50).required(),
+    description: Joi.string().optional(),
   };
 
   return Joi.validate(genre, schema);

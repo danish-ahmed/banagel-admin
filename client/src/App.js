@@ -30,6 +30,10 @@ import ShopProductEdit from "./components/shopProducts/ShopProductEdit";
 import SegmentList from "./components/segments/SegmentList";
 import SegmentCreate from "./components/segments/SegmentCreate";
 import SegmentEdit from "./components/segments/SegmentEdit";
+
+import OrderList from "./components/orders/OrderList";
+import UserList from "./components/users/UserList";
+import UserEdit from "./components/users/UserEdit";
 function App() {
   const [permission, setPermissions] = useState("");
   useEffect(() => {
@@ -45,6 +49,7 @@ function App() {
       dataProvider={MyDataProvider}
       layout={MyLayout}
       i18nProvider={i18nProvider}
+
       // locale="en"
     >
       <Resource
@@ -52,7 +57,7 @@ function App() {
         label="Shop"
         show={ShopShow}
         list={ShopList}
-        edit={permission == "edit" ? ShopEdit : null}
+        edit={ShopEdit}
         create={permission === "admin" ? ShopCreate : null}
       />
       <Resource
@@ -96,6 +101,24 @@ function App() {
         permission={authProvider.getPermissions()}
         create={permission === "member" ? ShopProductCreate : null}
         edit={permission === "member" ? ShopProductEdit : null}
+      />
+
+      <Resource
+        name="orders"
+        label="Orders"
+        list={OrderList}
+        // permission={authProvider.getPermissions()}
+        // create={permission === "member" ? ShopProductCreate : null}
+        // edit={permission === "member" ? ShopProductEdit : null}
+      />
+      <Resource
+        name="users"
+        label="Users"
+        list={UserList}
+        edit={UserEdit}
+        // permission={authProvider.getPermissions()}
+        // create={permission === "member" ? ShopProductCreate : null}
+        // edit={permission === "member" ? ShopProductEdit : null}
       />
     </Admin>
   );

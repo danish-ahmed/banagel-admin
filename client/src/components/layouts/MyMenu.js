@@ -45,6 +45,16 @@ const MyMenu = ({ onMenuClick, logout }) => {
         primaryText="Shop Products"
         leftIcon={<StoreIcon />}
       />
+      <MenuItemLink
+        to="/orders"
+        primaryText="Orders"
+        leftIcon={<StoreIcon />}
+      />
+      <MenuItemLink
+        to="/users"
+        primaryText="Profile"
+        leftIcon={<StoreIcon />}
+      />
 
       {/* <MenuItemLink
         to="/user"

@@ -28,7 +28,7 @@ router.post("/", [auth, admin], async (req, res) => {
   if (error) return res.status(400).send(error.details[0].message);
 
   const name = { en: req.body.name, de: req.body.name_de };
-  let segment = new Segment({ name: name });
+  let segment = new Segment({ name: name, description: req.body.description });
   segment = await segment.save();
 
   res.send(segment);
@@ -37,12 +37,13 @@ router.put("/:id", [auth, admin, validateObjectId], async (req, res) => {
   const { error } = validate({
     name: req.body.name.en,
     name_de: req.body.name.de,
+    description: req.body.description,
   });
   if (error) return res.status(400).send(error.details[0].message);
 
   const segment = await Segment.findByIdAndUpdate(
     req.params.id,
-    { name: req.body.name },
+    { name: req.body.name, description: req.body.description },
     {
       new: true,
     }

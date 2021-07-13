@@ -35,6 +35,11 @@ const shopProductSchema = new mongoose.Schema({
     minlength: 2,
     maxlength: 200,
   },
+  actualPrice: {
+    type: Number,
+    min: 0,
+    max: 255,
+  },
   price: {
     type: Number,
     min: 0,

@@ -14,8 +14,10 @@ router.post("/", auth, async (req, res) => {
 
   let customer = new Customer({
     name: req.body.name,
-    isGold: req.body.isGold,
+    email: req.body.email,
+    // isGold: req.body.isGold,
     phone: req.body.phone,
+    address: req.body.address,
   });
   customer = await customer.save();
 
