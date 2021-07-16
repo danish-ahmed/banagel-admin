@@ -70,6 +70,10 @@ const shopProductSchema = new mongoose.Schema({
     type: Boolean,
     defaul: false,
   },
+  isProductOfMonth: {
+    type: Boolean,
+    defaul: false,
+  },
   discount: {
     type: Number,
     min: 0,

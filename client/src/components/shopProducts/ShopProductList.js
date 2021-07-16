@@ -31,7 +31,6 @@ const ShopProductList = (props) => {
           source={`category.category.name[${locale}]`}
           label="SubCategory"
         />
-
         <EditButton basePath="/shop-products" label="Edit" />
         <DeleteButton basePath="/shop-products" label="Delete" />
       </Datagrid>

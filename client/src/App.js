@@ -27,6 +27,7 @@ import CategoriesCreate from "./components/categories/CategoriesCreate";
 import { API_URL } from "./config";
 import MyDataProvider from "./MyDataProvider";
 import ShopProductEdit from "./components/shopProducts/ShopProductEdit";
+import ShopProductAdminEdit from "./components/shopProducts/ShopProductAdminEdit";
 import SegmentList from "./components/segments/SegmentList";
 import SegmentCreate from "./components/segments/SegmentCreate";
 import SegmentEdit from "./components/segments/SegmentEdit";
@@ -104,7 +105,7 @@ function App() {
         list={ShopProductList}
         permission={authProvider.getPermissions()}
         create={permission === "member" ? ShopProductCreate : null}
-        edit={permission === "member" ? ShopProductEdit : null}
+        edit={permission === "admin" ? ShopProductAdminEdit : ShopProductEdit}
       />
 
       <Resource
