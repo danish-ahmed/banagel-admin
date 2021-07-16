@@ -19,19 +19,23 @@ router.get("/", [auth], async (req, res) => {
     const user_shop = await Shop.findOne()
       .where({ owner: req.user._id })
       .sort("name");
-    console.log(user_shop);
-    const shopproducts = await ShopProduct.find()
-      .where({ "shop._id": user_shop._id })
-      .select("-__v")
-      .sort("name");
+    const shopproducts = setDiscountPrice(
+      await ShopProduct.find()
+        .where({ "shop._id": user_shop._id })
+        .select("-__v")
+        .sort("name")
+    );
     res.range({
       first: req.range.first,
       last: req.range.last,
       length: shopproducts.length,
     });
+    // const products = setDiscountPrice(shopproducts);
     res.send(shopproducts.slice(req.range.first, req.range.last + 1));
   }
-  const shopproducts = await ShopProduct.find().select("-__v").sort("name");
+  const shopproducts = setDiscountPrice(
+    await ShopProduct.find().select("-__v").sort("name")
+  );
 
   //Pagination
   res.range({
@@ -95,6 +99,8 @@ router.post("/", [upload], async (req, res) => {
     shop: shop,
     name: { en: req.body.name, de: req.body.name_de },
     image: _file,
+    stock: req.body.stock,
+    unit: req.body.unit,
     product: product,
     category: subcategory,
     price: dis_date.price,
@@ -156,13 +162,19 @@ router.put("/:id", [upload, validateObjectId], async (req, res) => {
       ).toFixed(2),
     };
   }
-
+  let prevShopProduct = await ShopProduct.findById(req.params.id);
+  if (!prevShopProduct)
+    return res.status(400).send("Product Not Found with this ID");
   let shopproduct = await ShopProduct.findByIdAndUpdate(
     req.params.id,
     {
       shop: shop,
       name: { en: req.body.name, de: req.body.name_de },
       image: _file,
+      unit: req.body.unit,
+      stock: req.body.addToStock
+        ? prevShopProduct.stock + parseInt(req.body.addToStock)
+        : prevShopProduct.stock,
       product: product,
       category: subcategory,
       price: dis_date.price,
@@ -183,6 +195,24 @@ router.put("/:id", [upload, validateObjectId], async (req, res) => {
 
   res.send(shopproduct);
 });
+
+router.put("/add-stock/:id", [upload, validateObjectId], async (req, res) => {
+  const { error } = validate(req.body);
+  if (error) return res.status(400).send(error.details[0].message);
+
+  const shopproduct = await ShopProduct.findById(req.params.id);
+  let shopproduct_new = await ShopProduct.findByIdAndUpdate(
+    req.params.id,
+    {
+      stock: shopproduct.stock + req.body.stock,
+    },
+    {
+      new: true,
+    }
+  );
+
+  res.send(shopproduct_new);
+});
 router.delete("/:id", [auth], async (req, res) => {
   const shopproduct = await ShopProduct.findByIdAndRemove(req.params.id);
 
@@ -192,16 +222,47 @@ router.delete("/:id", [auth], async (req, res) => {
   res.send(shopproduct);
 });
 
+const setDiscountPrice = (products) => {
+  //   discount_start_date
+  // discount_end_date
+  const currentDate = Date.now();
+  let newProducts = products.map((product) => {
+    console.log(
+      product.hasDiscount,
+      currentDate,
+      Date.parse(product.discountStartDate),
+      Date.parse(product.discountEndDate)
+    );
+    if (
+      product.hasDiscount &&
+      currentDate >= Date.parse(product.discountStartDate) &&
+      currentDate <= Date.parse(product.discountEndDate)
+    ) {
+      product.price =
+        product.actualPrice - (product.dicount * product.actualPrice) / 100;
+      return product;
+    } else {
+      console.log("in else");
+      product.price = product.actualPrice;
+      return product;
+    }
+  });
+  return newProducts;
+};
+
 router.get("/segment/:id", [validateObjectId], async (req, res) => {
   //All Products for admin
   const segment = await Segment.findById(req.params.id);
   if (!segment) return res.status(400).send("Invalid Segment ID.");
-  const shops = await Shop.find().where({ segment });
-  const shopproducts = await ShopProduct.find()
-    .where("shop")
-    .in(shops)
-    .select("-__v")
-    .sort("name");
+  const shops = await Shop.find()
+    .where({ "segment._id": req.params.id })
+    .select("_id");
+  const shopproducts = setDiscountPrice(
+    await ShopProduct.find()
+      .where({ "shop._id": shops })
+      .select("-__v")
+      .sort("name")
+  );
 
   res.send({ segment: segment._id, data: shopproducts });
 });
@@ -212,7 +273,6 @@ router.get("/segment-page/:id", [validateObjectId], async (req, res) => {
   const segment = await Segment.findById(req.params.id);
   if (!segment) return res.status(400).send("Invalid Segment ID.");
 
-  console.log("segment", segment);
   const subcategories = await SubCategory.find({
     ["category.segment._id"]: segment._id,
   }).sort("name");
@@ -220,8 +280,7 @@ router.get("/segment-page/:id", [validateObjectId], async (req, res) => {
     .where({ ["category.segment"]: segment })
     .select("_id")
     .sort("name");
-  console.log("subcategories ", subcategorie_ids);
-  var shops = await ShopProduct.find()
+  var _shops = await ShopProduct.find()
     .where({
       ["category._id"]:
         filters.subcategory && filters.subcategory.length > 0
@@ -232,8 +291,9 @@ router.get("/segment-page/:id", [validateObjectId], async (req, res) => {
           ? filters.product
           : { $ne: null },
     })
-    .select("shop");
-
+    .select("shop._id");
+  const shopids = await _shops.map((shop) => shop.shop._id);
+  const shops = await Shop.find().where({ _id: shopids });
   const products = await Product.find()
     .where({ ["category._id"]: subcategorie_ids })
     .select("_id, name")
@@ -273,7 +333,7 @@ router.get("/segment-page-old/:id", [validateObjectId], async (req, res) => {
         })
         .select("-__v")
         .sort("name");
-      console.log(await SubCategory.find({ _id: filters.subcategory }));
+      // console.log(await SubCategory.find({ _id: filters.subcategory }));
       return res.send({
         segment: segment._id,
         segmentData: segment,

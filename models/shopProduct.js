@@ -21,9 +21,24 @@ const shopProductSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true,
-    minlength: 5,
+    minlength: 2,
     maxlength: 255,
     intl: true,
+  },
+  unit: {
+    type: String,
+    required: true,
+    trim: true,
+    minlength: 2,
+    maxlength: 255,
+  },
+  stock: {
+    type: Number,
+    required: true,
+    trim: true,
+    minlength: 2,
+    maxlength: 255,
+    default: 0,
   },
   category: {
     type: subCategorySchema,
@@ -45,6 +60,7 @@ const shopProductSchema = new mongoose.Schema({
     min: 0,
     max: 255,
   },
+  //currency
   VAT: {
     type: Number,
     min: 0,
@@ -88,9 +104,12 @@ function validateProduct(product) {
     product: Joi.objectId().required(),
     name: Joi.string().min(2).max(50).required(),
     name_de: Joi.string().min(2).max(50).required(),
+    unit: Joi.string().min(2).max(50).required(),
     category: Joi.objectId().required(),
     image: Joi.object(),
     price: Joi.number().min(0).required(),
+    stock: Joi.number().min(0).optional(),
+    addToStock: Joi.number().min(0).optional(),
     VAT: Joi.number().required(),
     hasDiscount: Joi.boolean(),
     description: Joi.string(),
@@ -103,6 +122,11 @@ function validateProduct(product) {
   return Joi.validate(product, schema);
 }
 
+shopProductSchema.pre("find", function () {
+  // if (this.discount === true) {
+  this.disprice = this.actualPrice * this.discount;
+  // }
+});
 const ShopProduct = mongoose.model("ShopProducts", shopProductSchema);
 exports.ShopProduct = ShopProduct;
 exports.shopProductSchema = shopProductSchema;

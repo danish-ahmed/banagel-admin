@@ -7,6 +7,8 @@ import {
   FormGroup,
   Grid,
 } from "@material-ui/core";
+import Typography from "@material-ui/core/Typography";
+
 import decodeJwt from "jwt-decode";
 
 import TextField from "@material-ui/core/TextField";
@@ -14,7 +16,6 @@ import { makeStyles } from "@material-ui/core/styles";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import Button from "@material-ui/core/Button";
-import Typography from "@material-ui/core/Typography";
 import { Alert } from "@material-ui/lab";
 import { DropzoneArea } from "material-ui-dropzone";
 import ReactQuill from "react-quill";
@@ -27,6 +28,7 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Switch from "@material-ui/core/Switch";
 import { DateRangePicker, DateRange } from "materialui-daterange-picker";
 
+import Slider from "@material-ui/core/Slider";
 import ProductSelect from "../commons/ProductSelect";
 import "../products/Product.css";
 
@@ -53,10 +55,13 @@ export default function ShopProductEdit(props) {
     name: "",
     name_de: "",
     shop: "",
-    price: "",
+    price: 0,
     category: "",
     discount: "",
     VAT: 0,
+    unit: "",
+    stock: 0,
+    addToStock: 0,
     selectedTags: [],
   });
   const [tags, setTags] = React.useState([]);
@@ -107,6 +112,8 @@ export default function ShopProductEdit(props) {
           ["VAT"]: shopproduct.VAT ? shopproduct.VAT : 0,
           ["shop"]: shopproduct.shop._id,
           ["category"]: shopproduct.category._id,
+          ["unit"]: shopproduct.unit,
+          ["stock"]: shopproduct.stock,
           // ["selectedTags"]: shopproduct.tags,
           ["discount"]: shopproduct.discount ? shopproduct.discount : 0,
         });
@@ -132,7 +139,9 @@ export default function ShopProductEdit(props) {
     }
     getTags();
   }, []);
-
+  const handleStockChange = (event, newValue) => {
+    setValues({ ...values, ["addToStock"]: newValue });
+  };
   const handleChange = (prop) => (event) => {
     setError(null);
     setValues({ ...values, [prop]: event.target.value });
@@ -220,6 +229,8 @@ export default function ShopProductEdit(props) {
     formData.append("name", values.name);
     formData.append("name_de", values.name_de);
     formData.append("price", values.price);
+    formData.append("unit", values.unit);
+    formData.append("addToStock", values.addToStock);
     formData.append("VAT", values.VAT);
     formData.append("category", values.category);
     formData.append("tags", values.selectedTags);
@@ -331,6 +342,42 @@ export default function ShopProductEdit(props) {
                       value={values.VAT}
                       type="number"
                       onChange={handleChange("VAT")}
+                    />
+                  </FormControl>
+                </Grid>
+              </Grid>
+              <Grid container spacing={2}>
+                <Grid item xs={6}>
+                  <FormControl fullWidth className={classes.margin}>
+                    <InputLabel htmlFor="unit">Unit</InputLabel>
+                    <Input
+                      id="unit"
+                      name="unit"
+                      value={values.unit}
+                      type="text"
+                      onChange={handleChange("unit")}
+                      placeholder="Unit eg: 1.5 kg OR 1 Piece"
+                    />
+                  </FormControl>
+                </Grid>
+                <Grid item xs={6}>
+                  <FormControl fullWidth className={classes.margin}>
+                    <Typography id="discrete-slider" gutterBottom>
+                      Add to Stock{" "}
+                      <small>
+                        Total {values.stock} + {values.addToStock} ={" "}
+                        {values.stock + values.addToStock}
+                      </small>
+                    </Typography>
+                    <Slider
+                      defaultValue={values.addToStock}
+                      aria-labelledby="discrete-slider"
+                      valueLabelDisplay="auto"
+                      step={20}
+                      onChange={handleStockChange}
+                      marks
+                      min={0}
+                      max={1000}
                     />
                   </FormControl>
                 </Grid>

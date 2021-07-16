@@ -299,19 +299,21 @@ router.get("/products/:id", validateObjectId, async (req, res) => {
     .where({ ["category.segment._id"]: segment._id })
     .select("_id")
     .sort("name");
-  var products = await ShopProduct.find()
-    .where({
-      ["category._id"]:
-        filters.subcategory && filters.subcategory.length > 0
-          ? await SubCategory.find({ _id: filters.subcategory }).select("_id")
-          : subcategories_ids,
-      ["product._id"]:
-        filters.product && filters.product.length > 0
-          ? filters.product
-          : { $ne: null },
-      ["shop._id"]: shop._id,
-    })
-    .select("-__v");
+  var products = setDiscountPrice(
+    await ShopProduct.find()
+      .where({
+        ["category._id"]:
+          filters.subcategory && filters.subcategory.length > 0
+            ? await SubCategory.find({ _id: filters.subcategory }).select("_id")
+            : subcategories_ids,
+        ["product._id"]:
+          filters.product && filters.product.length > 0
+            ? filters.product
+            : { $ne: null },
+        ["shop._id"]: shop._id,
+      })
+      .select("-__v")
+  );
 
   const productList = await Product.find()
     .where({ ["category._id"]: subcategories_ids })
@@ -326,4 +328,31 @@ router.get("/products/:id", validateObjectId, async (req, res) => {
     subcategories,
   });
 });
+const setDiscountPrice = (products) => {
+  //   discount_start_date
+  // discount_end_date
+  const currentDate = Date.now();
+  let newProducts = products.map((product) => {
+    console.log(
+      product.hasDiscount,
+      currentDate,
+      Date.parse(product.discountStartDate),
+      Date.parse(product.discountEndDate)
+    );
+    if (
+      product.hasDiscount &&
+      currentDate >= Date.parse(product.discountStartDate) &&
+      currentDate <= Date.parse(product.discountEndDate)
+    ) {
+      product.price =
+        product.actualPrice - (product.dicount * product.actualPrice) / 100;
+      return product;
+    } else {
+      console.log("in else");
+      product.price = product.actualPrice;
+      return product;
+    }
+  });
+  return newProducts;
+};
 module.exports = router;

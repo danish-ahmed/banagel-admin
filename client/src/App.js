@@ -34,6 +34,10 @@ import SegmentEdit from "./components/segments/SegmentEdit";
 import OrderList from "./components/orders/OrderList";
 import UserList from "./components/users/UserList";
 import UserEdit from "./components/users/UserEdit";
+import OfferList from "./components/offers/OfferList";
+import OfferCreate from "./components/offers/OfferCreate";
+import OfferEdit from "./components/offers/OfferEdit";
+import OfferEditAdmin from "./components/offers/OfferAdminEdit";
 function App() {
   const [permission, setPermissions] = useState("");
   useEffect(() => {
@@ -101,6 +105,14 @@ function App() {
         permission={authProvider.getPermissions()}
         create={permission === "member" ? ShopProductCreate : null}
         edit={permission === "member" ? ShopProductEdit : null}
+      />
+
+      <Resource
+        name="offers"
+        label="Offers"
+        list={OfferList}
+        create={OfferCreate}
+        edit={permission === "admin" ? OfferEditAdmin : OfferEdit}
       />
 
       <Resource

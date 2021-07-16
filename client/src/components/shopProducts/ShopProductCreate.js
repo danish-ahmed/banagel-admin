@@ -53,7 +53,9 @@ export default function ShopProductCreate(props) {
     name: "",
     name_de: "",
     shop: "",
-    price: "",
+    price: 0,
+    unit: "",
+    stock: 0,
     category: "",
     discount: 0,
     VAT: 0,
@@ -226,6 +228,8 @@ export default function ShopProductCreate(props) {
     formData.append("name", values.name);
     formData.append("name_de", values.name_de);
     formData.append("price", values.price);
+    formData.append("unit", values.unit);
+    formData.append("stock", values.stock);
     formData.append("VAT", values.VAT);
     formData.append("category", values.category);
     formData.append("tags", values.selectedTags);
@@ -338,6 +342,35 @@ export default function ShopProductCreate(props) {
                   </FormControl>
                 </Grid>
               </Grid>
+
+              <Grid container spacing={2}>
+                <Grid item xs={6}>
+                  <FormControl fullWidth className={classes.margin}>
+                    <InputLabel htmlFor="unit">Unit</InputLabel>
+                    <Input
+                      id="unit"
+                      name="unit"
+                      value={values.unit}
+                      type="text"
+                      onChange={handleChange("unit")}
+                      placeholder="Unit eg: 1.5 kg OR 1 Piece"
+                    />
+                  </FormControl>
+                </Grid>
+                <Grid item xs={6}>
+                  <FormControl fullWidth className={classes.margin}>
+                    <InputLabel htmlFor="stock">Stock</InputLabel>
+                    <Input
+                      id="stock"
+                      name="stock"
+                      value={values.stock}
+                      type="number"
+                      onChange={handleChange("stock")}
+                    />
+                  </FormControl>
+                </Grid>
+              </Grid>
+
               <FormGroup class="custom-control" className={classes.margin}>
                 <FormControlLabel
                   control={

@@ -11,6 +11,7 @@ const segments = require("../routes/segments");
 const users = require("../routes/users");
 const auth = require("../routes/auth");
 const order = require("../routes/order");
+const offers = require("../routes/offers");
 const error = require("../middleware/error");
 
 module.exports = function (app) {
@@ -24,6 +25,7 @@ module.exports = function (app) {
   app.use("/api/products", products);
   app.use("/api/shop-products", shopProducts);
   app.use("/api/orders", order);
+  app.use("/api/offers", offers);
   app.use("/api/users", users);
   app.use("/api/auth", auth);
   // app.use("/api/returns", returns);
