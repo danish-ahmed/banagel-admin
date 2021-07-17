@@ -8,7 +8,7 @@ export default function Categories(props) {
   const [categories, setCategories] = useState([]);
   useEffect(() => {
     async function getData() {
-      const response = await fetch(API_URL + "/categories", {
+      const response = await fetch(API_URL + "/categories/all", {
         method: "GET",
         headers: new Headers({
           Accept: "application/json",

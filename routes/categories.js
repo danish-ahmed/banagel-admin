@@ -15,6 +15,15 @@ router.get("/", async (req, res) => {
   });
   res.send(category.slice(req.range.first, req.range.last + 1));
 });
+router.get("/all", async (req, res) => {
+  const category = await Category.find().select("-__v").sort("name");
+  // res.range({
+  //   first: req.range.first,
+  //   last: req.range.last,
+  //   length: category.length,
+  // });
+  res.send(category);
+});
 router.post("/", [auth, admin], async (req, res) => {
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
