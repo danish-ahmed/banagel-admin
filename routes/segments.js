@@ -6,7 +6,7 @@ const admin = require("../middleware/admin");
 const validateObjectId = require("../middleware/validateObjectId");
 
 router.get("/", async (req, res) => {
-  const filters = JSON.parse(req.query.filter);
+  // const filters = JSON.parse(req.query.filter);
   const segments = await Segment.find().select("-__v").sort("name");
   res.range({
     first: req.range.first,
