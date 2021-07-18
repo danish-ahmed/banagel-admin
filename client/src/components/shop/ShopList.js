@@ -28,9 +28,7 @@ const ShopList = (props) => {
         <ShowButton basePath="/shops" label="Show" />
 
         {props.permissions === "admin" && (
-          <>
-            <DeleteButton basePath="/shops" label="Delete" />
-          </>
+          <DeleteButton basePath="/shops" label="Delete" />
         )}
       </Datagrid>
     </List>

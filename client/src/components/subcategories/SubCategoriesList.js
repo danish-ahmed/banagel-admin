@@ -15,7 +15,7 @@ const SubCategoriesList = (props) => {
   return (
     <List {...props} aside={<CategoryFilter />}>
       <Datagrid>
-        <TextField source="_id" />
+        {/* <TextField source="_id" /> */}
         <TextField source={`category.segment.name.${locale}`} label="Segment" />
         <TextField source={`category.name.${locale}`} label="Category" />
         <TextField source={`name.${locale}`} label="SubCategory Name" />

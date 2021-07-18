@@ -18,7 +18,7 @@ const Card = withStyles((theme) => ({
   },
 }))(MuiCard);
 
-const Segment = () => {
+const Categories = () => {
   const [categories, setCategories] = React.useState([]);
   const locale = useLocale();
   React.useEffect(() => {
@@ -36,7 +36,7 @@ const Segment = () => {
     getData();
   }, []);
   return (
-    <FilterList label="Segment" icon={<LocalOfferIcon />}>
+    <FilterList label="Categories" icon={<LocalOfferIcon />}>
       {categories.map((category) => (
         <FilterListItem
           label={category.name[locale]}
@@ -59,7 +59,7 @@ const ProductFilters = () => {
   return (
     <Card>
       <CardContent>
-        <Segment />
+        <Categories />
         <ShopName />
       </CardContent>
     </Card>

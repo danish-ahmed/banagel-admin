@@ -13,7 +13,7 @@ const SegmentList = (props) => {
   return (
     <List {...props}>
       <Datagrid>
-        <TextField source="id" />
+        {/* <TextField source="id" /> */}
         <TextField source={`name.${locale}`} label="Name" />
         {props.permissions === "admin" && (
           <EditButton basePath="/segments" label="Edit" />

@@ -14,7 +14,7 @@ const CategoriesList = (props) => {
   return (
     <List {...props} aside={<CategoryFilter />}>
       <Datagrid>
-        <TextField source="id" />
+        {/* <TextField source="id" /> */}
         <TextField source={`segment.name.${locale}`} label="Segment" />
         <TextField source={`name.${locale}`} label="Category Name" />
         {props.permissions === "admin" && (
