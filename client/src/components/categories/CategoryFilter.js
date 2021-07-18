@@ -19,51 +19,43 @@ const Card = withStyles((theme) => ({
 }))(MuiCard);
 
 const Segment = () => {
-  const [categories, setCategories] = React.useState([]);
+  const [segments, setSegments] = React.useState([]);
   const locale = useLocale();
   React.useEffect(() => {
     // setValues({ ...values, ["owner"]: localStorage.getItem("user").id });
     async function getData() {
-      const response = await fetch(API_URL + "/subcategories/all", {
+      const response = await fetch(API_URL + "/segments/all", {
         method: "GET",
         headers: new Headers({
           Accept: "application/json",
         }),
       });
       let result = await response.json();
-      setCategories(result);
+      setSegments(result);
     }
     getData();
   }, []);
   return (
     <FilterList label="Segment" icon={<LocalOfferIcon />}>
-      {categories.map((category) => (
+      {segments.map((segment) => (
         <FilterListItem
-          label={category.name[locale]}
-          key={category._id}
-          value={{ "category._id": category._id }}
+          label={segment.name[locale]}
+          key={segment._id}
+          value={{ "segment._id": segment._id }}
         />
       ))}
     </FilterList>
   );
 };
-const ShopName = (props) => {
-  const locale = useLocale();
-  return (
-    <Filter {...props}>
-      <TextInput label="Product Name" source="name" alwaysOn />
-    </Filter>
-  );
-};
-const ProductFilters = () => {
+
+const CategoryFilter = () => {
   return (
     <Card>
       <CardContent>
         <Segment />
-        <ShopName />
       </CardContent>
     </Card>
   );
 };
 
-export default ProductFilters;
+export default CategoryFilter;

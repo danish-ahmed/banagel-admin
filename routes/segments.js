@@ -6,6 +6,7 @@ const admin = require("../middleware/admin");
 const validateObjectId = require("../middleware/validateObjectId");
 
 router.get("/", async (req, res) => {
+  const filters = JSON.parse(req.query.filter);
   const segments = await Segment.find().select("-__v").sort("name");
   res.range({
     first: req.range.first,
@@ -13,6 +14,11 @@ router.get("/", async (req, res) => {
     length: segments.length,
   });
   res.send(segments.slice(req.range.first, req.range.last + 1));
+});
+router.get("/all", async (req, res) => {
+  const segments = await Segment.find().select("-__v").sort("name");
+
+  res.send(segments);
 });
 router.get("/:id", validateObjectId, async (req, res) => {
   const segment = await Segment.findById(req.params.id).select("-__v");

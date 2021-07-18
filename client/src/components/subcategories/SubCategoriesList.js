@@ -7,12 +7,13 @@ import {
   DeleteButton,
   useLocale,
 } from "react-admin";
+import CategoryFilter from "./CategoryFilter";
 
 const SubCategoriesList = (props) => {
   const locale = useLocale();
 
   return (
-    <List {...props}>
+    <List {...props} aside={<CategoryFilter />}>
       <Datagrid>
         <TextField source="_id" />
         <TextField source={`category.segment.name.${locale}`} label="Segment" />

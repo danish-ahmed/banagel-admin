@@ -7,7 +7,11 @@ const express = require("express");
 const router = express.Router();
 
 router.get("/", async (req, res) => {
-  const subcategory = await SubCategory.find().select("-__v").sort("name");
+  const filters = JSON.parse(req.query.filter);
+  const subcategory = await SubCategory.find()
+    .where({ ...filters })
+    .select("-__v")
+    .sort("name");
   res.range({
     first: JSON.parse(req.query.range)[0],
     last: JSON.parse(req.query.range)[1],
