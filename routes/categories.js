@@ -9,11 +9,16 @@ const router = express.Router();
 router.get("/", async (req, res) => {
   const category = await Category.find().select("-__v").sort("name");
   res.range({
-    first: req.range.first,
-    last: req.range.last,
+    first: JSON.parse(req.query.range)[0],
+    last: JSON.parse(req.query.range)[1],
     length: category.length,
   });
-  res.send(category.slice(req.range.first, req.range.last + 1));
+  res.send(
+    category.slice(
+      JSON.parse(req.query.range)[0],
+      JSON.parse(req.query.range)[1] + 1
+    )
+  );
 });
 router.get("/all", async (req, res) => {
   const category = await Category.find().select("-__v").sort("name");

@@ -26,12 +26,16 @@ router.get("/", [auth], async (req, res) => {
         .sort("name")
     );
     res.range({
-      first: req.range.first,
-      last: req.range.last,
+      first: JSON.parse(req.query.range)[0],
+      last: JSON.parse(req.query.range)[1],
       length: shopproducts.length,
     });
-    // const products = setDiscountPrice(shopproducts);
-    res.send(shopproducts.slice(req.range.first, req.range.last + 1));
+    res.send(
+      shopproducts.slice(
+        JSON.parse(req.query.range)[0],
+        JSON.parse(req.query.range)[1] + 1
+      )
+    );
   }
   const shopproducts = setDiscountPrice(
     await ShopProduct.find().select("-__v").sort("name")
@@ -39,11 +43,16 @@ router.get("/", [auth], async (req, res) => {
 
   //Pagination
   res.range({
-    first: req.range.first,
-    last: req.range.last,
+    first: JSON.parse(req.query.range)[0],
+    last: JSON.parse(req.query.range)[1],
     length: shopproducts.length,
   });
-  res.send(shopproducts.slice(req.range.first, req.range.last + 1));
+  res.send(
+    shopproducts.slice(
+      JSON.parse(req.query.range)[0],
+      JSON.parse(req.query.range)[1] + 1
+    )
+  );
 });
 router.get("/:id", validateObjectId, async (req, res) => {
   const product = await ShopProduct.findById(req.params.id).select("-__v");

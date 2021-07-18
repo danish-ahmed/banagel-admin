@@ -3,23 +3,19 @@ import {
   Edit,
   SimpleForm,
   TextInput,
-  ReferenceInput,
-  SelectInput,
+  // ReferenceInput,
+  // SelectInput,
 } from "react-admin";
+import Categories from "../commons/Categories";
 
 export default function SubCategoriesEdit(props) {
+  console.log(props);
   return (
     <Edit {...props}>
-      <SimpleForm>
+      <SimpleForm resource>
         <TextInput source="name.en" />
         <TextInput source="name.de" lable="Name in German" />
-        <ReferenceInput
-          label="Category"
-          source="category"
-          reference="categories"
-        >
-          <SelectInput optionText="name.en" />
-        </ReferenceInput>
+        <Categories source="categories.name.en" />
       </SimpleForm>
     </Edit>
   );

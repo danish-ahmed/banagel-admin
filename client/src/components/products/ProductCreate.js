@@ -47,7 +47,7 @@ export default function ProductCreate(props) {
   React.useEffect(() => {
     // setValues({ ...values, ["owner"]: localStorage.getItem("user").id });
     async function getData() {
-      const response = await fetch(API_URL + "/subcategories", {
+      const response = await fetch(API_URL + "/subcategories/all", {
         method: "GET",
         headers: new Headers({
           Accept: "application/json",

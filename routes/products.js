@@ -28,21 +28,31 @@ router.get("/", async (req, res) => {
 
     //Pagination
     res.range({
-      first: req.range.first,
-      last: req.range.last,
+      first: JSON.parse(req.query.range)[0],
+      last: JSON.parse(req.query.range)[1],
       length: products.length,
     });
-    res.send(products.slice(req.range.first, req.range.last + 1));
+    res.send(
+      products.slice(
+        JSON.parse(req.query.range)[0],
+        JSON.parse(req.query.range)[1] + 1
+      )
+    );
   } else {
     const products = await Product.find().select("-__v").sort("name");
 
     //Pagination
     res.range({
-      first: req.range.first,
-      last: req.range.last,
+      first: JSON.parse(req.query.range)[0],
+      last: JSON.parse(req.query.range)[1],
       length: products.length,
     });
-    res.send(products.slice(req.range.first, req.range.last + 1));
+    res.send(
+      products.slice(
+        JSON.parse(req.query.range)[0],
+        JSON.parse(req.query.range)[1] + 1
+      )
+    );
   }
 });
 
