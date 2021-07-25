@@ -109,7 +109,7 @@ function validateProduct(product) {
     name: Joi.string().min(2).max(50).required(),
     name_de: Joi.string().min(2).max(50).required(),
     unit: Joi.string().min(2).max(50).required(),
-    category: Joi.objectId().required(),
+    // category: Joi.objectId().required(),
     image: Joi.object(),
     price: Joi.number().min(0).required(),
     stock: Joi.number().min(0).optional(),

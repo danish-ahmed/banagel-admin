@@ -17,8 +17,8 @@ const ShopProductList = (props) => {
     <List {...props}>
       <Datagrid>
         {/* <TextField source="id" /> */}
-        <TextField source={`shop.shopname.${locale}`} label="Shop Name" />
         <TextField source={`name[${locale}]`} label="Product Name" />
+        <TextField source={`shop.shopname.${locale}`} label="Shop Name" />
         <TextField source="actualPrice" />
         <BooleanField source="hasDiscount" />
         <TextField source="discount" />
@@ -26,11 +26,11 @@ const ShopProductList = (props) => {
 
         <TextField source="VAT" />
         <ImageField source="image" title={`name[${locale}]`} label="Image" />
-        <TextField source={`category.name[${locale}]`} label="Category" />
         <TextField
           source={`category.category.name[${locale}]`}
-          label="SubCategory"
+          label="Category"
         />
+        <TextField source={`category.name[${locale}]`} label="Sub Category" />
         <EditButton basePath="/shop-products" label="Edit" />
         <DeleteButton basePath="/shop-products" label="Delete" />
       </Datagrid>

@@ -10,7 +10,7 @@ export default function ShopProductSelect(props) {
   React.useEffect(() => {
     // setValues({ ...values, ["owner"]: localStorage.getItem("user").id });
     async function getData() {
-      const response = await fetch(API_URL + "/shop-products", {
+      const response = await fetch(API_URL + "/shop-products/all", {
         method: "GET",
         headers: new Headers({
           Accept: "application/json",

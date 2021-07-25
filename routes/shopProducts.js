@@ -10,9 +10,32 @@ const express = require("express");
 const router = express.Router();
 const upload = require("../middleware/fileUpload");
 const { Segment } = require("../models/segment");
+const { Offer } = require("../models/offer");
 const { Category } = require("../models/category");
 const { filter } = require("lodash");
 
+router.get("/all", [auth], async (req, res) => {
+  if (req.user.role == "member") {
+    const user_shop = await Shop.findOne()
+      .where({ owner: req.user._id })
+      .sort("name");
+    const shopproducts = setDiscountPrice(
+      await ShopProduct.find()
+        .where({ "shop._id": user_shop._id })
+        .select("-__v")
+        .sort("name")
+    );
+
+    return res.send(shopproducts);
+  }
+  const shopproducts = setDiscountPrice(
+    await ShopProduct.find().select("-__v").sort("name")
+  );
+
+  //Pagination
+
+  res.send(shopproducts);
+});
 router.get("/", [auth], async (req, res) => {
   //All Products for admin
   if (req.user.role == "member") {
@@ -30,7 +53,7 @@ router.get("/", [auth], async (req, res) => {
       last: JSON.parse(req.query.range)[1],
       length: shopproducts.length,
     });
-    res.send(
+    return res.send(
       shopproducts.slice(
         JSON.parse(req.query.range)[0],
         JSON.parse(req.query.range)[1] + 1
@@ -65,8 +88,8 @@ router.get("/:id", validateObjectId, async (req, res) => {
 router.post("/", [upload], async (req, res) => {
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
-  const subcategory = await SubCategory.findById(req.body.category);
-  if (!subcategory) return res.status(400).send("Invalid Category.");
+  // const subcategory = await SubCategory.findById(req.body.category);
+  // if (!subcategory) return res.status(400).send("Invalid Category.");
 
   const shop = await Shop.findById(req.body.shop);
   if (!shop) return res.status(400).send("Invalid Shop.");
@@ -111,7 +134,7 @@ router.post("/", [upload], async (req, res) => {
     stock: req.body.stock,
     unit: req.body.unit,
     product: product,
-    category: subcategory,
+    category: product.category,
     price: dis_date.price,
     actualPrice: dis_date.actualPrice,
     VAT: req.body.VAT,
@@ -130,10 +153,11 @@ router.post("/", [upload], async (req, res) => {
 });
 
 router.put("/:id", [upload, validateObjectId], async (req, res) => {
+  console.log("VAT -----", req.body.VAT);
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
-  const subcategory = await SubCategory.findById(req.body.category);
-  if (!subcategory) return res.status(400).send("Invalid Category.");
+  // const subcategory = await SubCategory.findById(req.body.category);
+  // if (!subcategory) return res.status(400).send("Invalid Category.");
 
   const shop = await Shop.findById(req.body.shop);
   if (!shop) return res.status(400).send("Invalid Shop.");
@@ -185,7 +209,7 @@ router.put("/:id", [upload, validateObjectId], async (req, res) => {
         ? prevShopProduct.stock + parseInt(req.body.addToStock)
         : prevShopProduct.stock,
       product: product,
-      category: subcategory,
+      // category: subcategory,
       price: dis_date.price,
       actualPrice: dis_date.actualPrice,
       VAT: req.body.VAT,
@@ -304,9 +328,16 @@ router.get("/segment-page/:id", [validateObjectId], async (req, res) => {
   const segment = await Segment.findById(req.params.id);
   if (!segment) return res.status(400).send("Invalid Segment ID.");
 
-  const subcategories = await SubCategory.find({
+  const categories_ids = await SubCategory.find({
     ["category.segment._id"]: segment._id,
-  }).sort("name");
+  })
+    .distinct("category._id")
+    .populate("subcategories");
+  // console.log(categories);
+  const categories = await Category.find({ _id: categories_ids }).populate(
+    "subcategories"
+  );
+
   const subcategorie_ids = await SubCategory.find()
     .where({ ["category.segment"]: segment })
     .select("_id")
@@ -329,13 +360,17 @@ router.get("/segment-page/:id", [validateObjectId], async (req, res) => {
     .where({ ["category._id"]: subcategorie_ids })
     .select("_id, name")
     .sort("name");
-
+  const offers = await Offer.find({
+    segment: req.params.id,
+    isVisibleOnSegmentsPage: true,
+  });
   return res.send({
     segment: segment._id,
     segmentData: segment,
     shops,
+    categories,
     data: products,
-    subcategories,
+    offers,
   });
 });
 

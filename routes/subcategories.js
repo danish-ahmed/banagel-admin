@@ -37,6 +37,7 @@ router.post("/", [auth, admin], async (req, res) => {
     return res
       .status(404)
       .send("The Category with the given ID was not found.");
+
   const name = {
     en: req.body.name,
     de: req.body.name_de,
@@ -45,7 +46,13 @@ router.post("/", [auth, admin], async (req, res) => {
     name: name,
     category: category,
   });
+
   subcategory = await subcategory.save();
+  const n_category = await Category.findByIdAndUpdate(
+    req.body.category,
+    { $push: { subcategories: subcategory._id } },
+    { new: true }
+  );
 
   res.send(subcategory);
 });
@@ -63,6 +70,7 @@ router.put("/:id", [auth, admin, validateObjectId], async (req, res) => {
     return res
       .status(404)
       .send("The Category with the given ID was not found.");
+  const prevSubcategory = await SubCategory.findById(req.params.id);
   const subcategory = await SubCategory.findByIdAndUpdate(
     req.params.id,
     {
@@ -73,11 +81,23 @@ router.put("/:id", [auth, admin, validateObjectId], async (req, res) => {
       new: true,
     }
   );
-
   if (!subcategory)
     return res
       .status(404)
       .send("The SubCategory with the given ID was not found.");
+
+  if (prevSubcategory.category._id !== req.body.category) {
+    await Category.findByIdAndUpdate(
+      prevSubcategory.category._id,
+      { $pull: { subcategories: prevSubcategory._id } },
+      { new: true }
+    );
+    const n_category = await Category.findByIdAndUpdate(
+      req.body.category,
+      { $push: { subcategories: subcategory._id } },
+      { new: true }
+    );
+  }
 
   res.send(subcategory);
 });

@@ -13,6 +13,7 @@ import { showNotification, useLocale } from "react-admin";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import "./Product.css";
+import Autocomplete from "@material-ui/lab/Autocomplete";
 import { API_URL } from "../../config";
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -168,7 +169,7 @@ export default function ProductCreate(props) {
               </Grid>
               <Grid item xs={6}>
                 <FormControl class="cat-control">
-                  <TextField
+                  {/* <TextField
                     id="category"
                     select
                     label="Select Category"
@@ -181,7 +182,24 @@ export default function ProductCreate(props) {
                         {option.name[locale]}
                       </MenuItem>
                     ))}
-                  </TextField>
+                  </TextField> */}
+                  <Autocomplete
+                    id="grouped-demo"
+                    options={categories}
+                    groupBy={(option) => option.category.name[locale]}
+                    getOptionLabel={(option) => option.name[locale]}
+                    style={{ width: 300 }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Select Category"
+                        variant="outlined"
+                      />
+                    )}
+                    // defaultValue={props.initialVal}
+                    // value={props.initialVal}
+                    onChange={props.handleSelect}
+                  />
                 </FormControl>
               </Grid>
             </Grid>

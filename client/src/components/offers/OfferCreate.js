@@ -86,7 +86,7 @@ export default function OfferCreate(props) {
 
           setTimeout(function () {
             props.history.push({
-              pathname: "/shops",
+              pathname: "/offers",
             });
           }, 500);
 

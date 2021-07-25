@@ -25,7 +25,10 @@ router.get("/", async (req, res) => {
   );
 });
 router.get("/all", async (req, res) => {
-  const category = await Category.find().select("-__v").sort("name");
+  const category = await Category.find()
+    .populate("subcategories")
+    .select("-__v")
+    .sort("name");
   // res.range({
   //   first: req.range.first,
   //   last: req.range.last,

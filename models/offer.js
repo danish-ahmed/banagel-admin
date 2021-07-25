@@ -79,12 +79,12 @@ const offerSchema = new mongoose.Schema({
       discountStartDate: {
         type: String,
         default: null,
-        required: true,
+        // required: true,
       },
       discountEndDate: {
         type: String,
         default: null,
-        required: true,
+        // required: true,
       },
       description: { type: String },
       createDate: {
@@ -122,6 +122,10 @@ const offerSchema = new mongoose.Schema({
   shop: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Shop",
+  },
+  segment: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Segment",
   },
   // offerStartDate: {
   //   type: String,

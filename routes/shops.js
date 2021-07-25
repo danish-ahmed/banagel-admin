@@ -4,6 +4,7 @@ const { Segment, segmentSchema } = require("../models/segment");
 const { ShopProduct } = require("../models/shopProduct");
 const { Product } = require("../models/product");
 const { SubCategory } = require("../models/subcategory");
+const { Category } = require("../models/category");
 const auth = require("../middleware/auth");
 const admin = require("../middleware/admin");
 const validateObjectId = require("../middleware/validateObjectId");
@@ -14,7 +15,6 @@ const range = require("express-range");
 const multer = require("multer");
 const upload = require("../middleware/fileUpload");
 const _ = require("lodash");
-const sizeOf = require("image-size");
 
 var storage = multer.diskStorage({
   destination: function (req, file, callback) {
@@ -55,7 +55,10 @@ router.get("/:id", validateObjectId, async (req, res) => {
 
   res.send(shop);
 });
-
+router.get("/all", async (req, res) => {
+  const shops = await Shop.find().select("-__v").populate("owner").sort("name");
+  res.send(shops);
+});
 router.get("/", [auth], async (req, res) => {
   // Members shops
   const filters = JSON.parse(req.query.filter);
@@ -261,7 +264,7 @@ router.put("/:id", [auth, mm], async (req, res) => {
       description: description,
 
       commercialID: req.body.commercialID,
-      owner: _.pick(user, "_id", "firstname", "lastname", "email"),
+      // owner: _.pick(user, "_id", "firstname", "lastname", "email"),
       segment: segment,
       phone: req.body.phone,
       publishDate: moment().toJSON(),
@@ -292,13 +295,24 @@ router.get("/products/:id", validateObjectId, async (req, res) => {
   const segment = await Segment.findById(shop.segment._id);
   if (!segment) return res.status(400).send("Invalid Segment ID.");
 
-  const subcategories = await SubCategory.find()
-    .where({ ["category.segment._id"]: segment._id })
-    .sort("name");
+  // const subcategories = await SubCategory.find()
+  //   .where({ ["category.segment._id"]: segment._id })
+  //   .sort("name");
   const subcategories_ids = await SubCategory.find()
     .where({ ["category.segment._id"]: segment._id })
     .select("_id")
     .sort("name");
+
+  const categories_ids = await SubCategory.find({
+    ["category.segment._id"]: segment._id,
+  })
+    .distinct("category._id")
+    .populate("subcategories");
+  // console.log(categories);
+  const categories = await Category.find({ _id: categories_ids }).populate(
+    "subcategories"
+  );
+
   var products = setDiscountPrice(
     await ShopProduct.find()
       .where({
@@ -325,7 +339,7 @@ router.get("/products/:id", validateObjectId, async (req, res) => {
     products,
     shop,
     productList: productList,
-    subcategories,
+    categories,
   });
 });
 const setDiscountPrice = (products) => {

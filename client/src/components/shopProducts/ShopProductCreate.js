@@ -231,7 +231,7 @@ export default function ShopProductCreate(props) {
     formData.append("unit", values.unit);
     formData.append("stock", values.stock);
     formData.append("VAT", values.VAT);
-    formData.append("category", values.category);
+    // formData.append("category", values.category);
     formData.append("tags", values.selectedTags);
     formData.append("description", description);
     formData.append("hasDiscount", hasDiscount);
@@ -438,28 +438,6 @@ export default function ShopProductCreate(props) {
                 </Grid>
               )}
               <Grid container spacing={2}>
-                <Grid item xs={6}>
-                  <FormControl class="cat-control" className={classes.margin}>
-                    <TextField
-                      id="category"
-                      select
-                      label="Select Category"
-                      value={values.category}
-                      onChange={handleChangeCategory}
-                      helperText="Please select your category"
-                    >
-                      {categories.map((option) => (
-                        <MenuItem
-                          key={option._id}
-                          value={option._id}
-                          selected={option._id === values.category}
-                        >
-                          {option.name[locale]}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                  </FormControl>
-                </Grid>
                 <Grid item xs={6}>
                   <FormControl className={classes.margin}>
                     <TagsCreate

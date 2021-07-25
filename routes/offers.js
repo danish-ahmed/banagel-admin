@@ -70,6 +70,8 @@ router.post("/", [auth, upload], async (req, res) => {
   );
   if (error) return res.status(400).send(error.details[0].message);
 
+  const shop = await Shop.findOne({ owner: req.user._id });
+
   const offerExist = await Offer.findOne({ owner: req.user._id });
   if (offerExist) return res.status(400).send("Offer Limit exceeds");
 
@@ -105,6 +107,8 @@ router.post("/", [auth, upload], async (req, res) => {
     name: req.body.offerName,
     description: req.body.description,
     products: products,
+    shop: shop._id,
+    segment: shop.segment._id,
     owner: req.user._id,
     image: req.file
       ? req.protocol +

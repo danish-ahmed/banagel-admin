@@ -143,8 +143,12 @@ export default function ShopProductEdit(props) {
     setValues({ ...values, ["addToStock"]: newValue });
   };
   const handleChange = (prop) => (event) => {
-    setError(null);
-    setValues({ ...values, [prop]: event.target.value });
+    // console.log(typeof event.target.value);
+    if (prop === "VAT") {
+      setValues({ ...values, ["VAT"]: parseInt(event.target.value) });
+    } else {
+      setValues({ ...values, [prop]: event.target.value });
+    }
   };
   const handleChangeCategory = (event) => {
     setValues({ ...values, ["category"]: event.target.value });
@@ -222,7 +226,7 @@ export default function ShopProductEdit(props) {
   };
   const handleSubmit = (event) => {
     setError(null);
-
+    console.log(values);
     const formData = new FormData();
     formData.append("shop", values.shop);
     formData.append("product", selectedProduct);
@@ -231,8 +235,8 @@ export default function ShopProductEdit(props) {
     formData.append("price", values.price);
     formData.append("unit", values.unit);
     formData.append("addToStock", values.addToStock);
-    formData.append("VAT", values.VAT);
-    formData.append("category", values.category);
+    formData.append("VAT", parseInt(values.VAT));
+    // formData.append("category", values.category);
     formData.append("tags", values.selectedTags);
     formData.append("description", description);
     formData.append("hasDiscount", hasDiscount);
@@ -277,7 +281,7 @@ export default function ShopProductEdit(props) {
     <Card className={classes.root}>
       <CardContent>
         <Typography variant="h5" component="h2">
-          Add Product to shop
+          Edit Shop Product
         </Typography>
         <br />
         {error && (
@@ -286,12 +290,12 @@ export default function ShopProductEdit(props) {
           </Alert>
         )}
         <form id="product-from" onSubmit={handleSubmit}>
-          <FormControl fullWidth className={classes.margin}>
+          {/* <FormControl fullWidth className={classes.margin}>
             <ProductSelect
               handleSelect={handleProductSelect}
               initialVal={selectedProductName}
             />
-          </FormControl>
+          </FormControl> */}
           {selectedProduct && (
             <div>
               <Grid container spacing={2}>
@@ -338,7 +342,7 @@ export default function ShopProductEdit(props) {
                     <InputLabel htmlFor="VAT">VAT %</InputLabel>
                     <Input
                       id="VAT"
-                      name="vat"
+                      name="VAT"
                       value={values.VAT}
                       type="number"
                       onChange={handleChange("VAT")}
@@ -449,28 +453,6 @@ export default function ShopProductEdit(props) {
                 </Grid>
               )}
               <Grid container spacing={2}>
-                <Grid item xs={6}>
-                  <FormControl class="cat-control" className={classes.margin}>
-                    <TextField
-                      id="category"
-                      select
-                      label="Select Category"
-                      value={values.category}
-                      onChange={handleChangeCategory}
-                      helperText="Please select your category"
-                    >
-                      {categories.map((option) => (
-                        <MenuItem
-                          key={option._id}
-                          value={option._id}
-                          selected={option._id === values.category}
-                        >
-                          {option.name[locale]}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                  </FormControl>
-                </Grid>
                 <Grid item xs={6}>
                   <FormControl className={classes.margin}>
                     <TagsCreate

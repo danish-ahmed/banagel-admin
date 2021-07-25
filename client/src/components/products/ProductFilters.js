@@ -24,7 +24,7 @@ const Categories = () => {
   React.useEffect(() => {
     // setValues({ ...values, ["owner"]: localStorage.getItem("user").id });
     async function getData() {
-      const response = await fetch(API_URL + "/subcategories/all", {
+      const response = await fetch(API_URL + "/categories/all", {
         method: "GET",
         headers: new Headers({
           Accept: "application/json",
@@ -41,7 +41,7 @@ const Categories = () => {
         <FilterListItem
           label={category.name[locale]}
           key={category._id}
-          value={{ "category._id": category._id }}
+          value={{ "category.category._id": category._id }}
         />
       ))}
     </FilterList>

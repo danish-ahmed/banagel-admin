@@ -14,6 +14,7 @@ const categorySchema = new mongoose.Schema({
     type: segmentSchema,
     required: true,
   },
+  subcategories: [{ type: mongoose.Schema.Types.ObjectId, ref: "SubCategory" }],
 });
 
 // Ensure virtual fields are serialised.

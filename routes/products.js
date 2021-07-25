@@ -70,12 +70,8 @@ router.get("/shop", [auth], async (req, res) => {
   })
     .select("-__v")
     .sort("name");
-  res.range({
-    first: req.range.first,
-    last: req.range.last,
-    length: products.length,
-  });
-  res.send(products.slice(req.range.first, req.range.last + 1));
+
+  res.send(products);
 });
 
 router.get("/:id", validateObjectId, async (req, res) => {
