@@ -64,12 +64,12 @@ const Order = mongoose.model(
         discountStartDate: {
           type: String,
           default: null,
-          required: true,
+          // required: true,
         },
         discountEndDate: {
           type: String,
           default: null,
-          required: true,
+          // required: true,
         },
         description: { type: String },
         quantity: { type: Number },
