@@ -60,6 +60,11 @@ const shopProductSchema = new mongoose.Schema({
     min: 0,
     max: 255,
   },
+  currency: {
+    type: String,
+    enum: ["EUR", "USD"],
+    default: "EUR",
+  },
   //currency
   VAT: {
     type: Number,
@@ -100,6 +105,21 @@ const shopProductSchema = new mongoose.Schema({
       required: true,
     },
   ],
+  reviews: [
+    {
+      ratting: { type: Number, default: 0 },
+      customer: {
+        type: mongoose.Schema.ObjectId,
+        ref: "customers",
+      },
+      date: {
+        type: Date,
+        default: Date.now(),
+      },
+      title: { type: String },
+      comment: { type: String },
+    },
+  ],
 });
 
 function validateProduct(product) {
@@ -109,7 +129,7 @@ function validateProduct(product) {
     name: Joi.string().min(2).max(50).required(),
     name_de: Joi.string().min(2).max(50).required(),
     unit: Joi.string().min(2).max(50).required(),
-    // category: Joi.objectId().required(),
+    currency: Joi.string().required(),
     image: Joi.object(),
     price: Joi.number().min(0).required(),
     stock: Joi.number().min(0).optional(),
@@ -125,7 +145,14 @@ function validateProduct(product) {
   };
   return Joi.validate(product, schema);
 }
-
+function validateReview(review) {
+  const schema = {
+    title: Joi.string().min(2).max(50).required(),
+    comment: Joi.string().min(2).max(50).required(),
+    ratting: Joi.number().min(0).max(5).required(),
+  };
+  return Joi.validate(review, schema);
+}
 shopProductSchema.pre("find", function () {
   // if (this.discount === true) {
   this.disprice = this.actualPrice * this.discount;
@@ -135,3 +162,4 @@ const ShopProduct = mongoose.model("ShopProducts", shopProductSchema);
 exports.ShopProduct = ShopProduct;
 exports.shopProductSchema = shopProductSchema;
 exports.validate = validateProduct;
+exports.validateReview = validateReview;

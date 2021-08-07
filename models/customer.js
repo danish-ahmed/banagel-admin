@@ -1,9 +1,11 @@
 const Joi = require("joi");
 const mongoose = require("mongoose");
+const config = require("config");
+const jwt = require("jsonwebtoken");
 const customerSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true,
+    // required: true,
     minlength: 5,
     maxlength: 50,
   },
@@ -14,13 +16,13 @@ const customerSchema = new mongoose.Schema({
     maxlength: 255,
     unique: true,
   },
-  // isGold: {
-  //   type: Boolean,
-  //   default: false
-  // },
+  isVerified: {
+    type: Boolean,
+    default: false,
+  },
   address: {
     type: String,
-    required: true,
+    // required: true,
     minlength: 2,
     maxlength: 50,
   },
@@ -30,7 +32,22 @@ const customerSchema = new mongoose.Schema({
     minlength: 5,
     maxlength: 50,
   },
+  authyId: {
+    type: String,
+  },
 });
+customerSchema.methods.generateAuthToken = function () {
+  const token = jwt.sign(
+    {
+      _id: this._id,
+      name: this.name,
+      email: this.email,
+      isVerified: this.isVerified,
+    },
+    config.get("jwtPrivateKey")
+  );
+  return token;
+};
 const Customer = mongoose.model("Customer", customerSchema);
 
 function validateCustomer(customer) {

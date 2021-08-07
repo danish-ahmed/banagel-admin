@@ -22,7 +22,7 @@ const ShopList = (props) => {
         <TextField source={segment} label="Segment" />
         <TextField source="phone" />
         <TextField source="address" />
-        <ImageField source="filename" title="shopname" label="Image" />
+        <ImageField source="logo" title="shopname" label="Image" />
         <TextField source="owner.firstname" label="Owner" />
         <EditButton basePath="/shops" label="Edit" />
         <ShowButton basePath="/shops" label="Show" />

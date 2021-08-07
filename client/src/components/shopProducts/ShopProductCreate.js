@@ -58,6 +58,7 @@ export default function ShopProductCreate(props) {
     stock: 0,
     category: "",
     discount: 0,
+    currency: "EUR",
     VAT: 0,
     selectedTags: [],
   });
@@ -228,6 +229,7 @@ export default function ShopProductCreate(props) {
     formData.append("name", values.name);
     formData.append("name_de", values.name_de);
     formData.append("price", values.price);
+    formData.append("currency", values.currency);
     formData.append("unit", values.unit);
     formData.append("stock", values.stock);
     formData.append("VAT", values.VAT);
@@ -438,6 +440,19 @@ export default function ShopProductCreate(props) {
                 </Grid>
               )}
               <Grid container spacing={2}>
+                <Grid item xs={6}>
+                  <FormControl fullWidth className={classes.margin}>
+                    <InputLabel htmlFor="currency">Currency</InputLabel>
+                    <Input
+                      id="currency"
+                      name="currency"
+                      value={values.currency}
+                      type="text"
+                      disabled={true}
+                      onChange={handleChange("currency")}
+                    />
+                  </FormControl>
+                </Grid>
                 <Grid item xs={6}>
                   <FormControl className={classes.margin}>
                     <TagsCreate

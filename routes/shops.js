@@ -1,5 +1,5 @@
-const { Shop, validate } = require("../models/shop");
-const { User } = require("../models/user");
+const { Shop, validate, shopValidate } = require("../models/shop");
+const { User, userValidate } = require("../models/user");
 const { Segment, segmentSchema } = require("../models/segment");
 const { ShopProduct } = require("../models/shopProduct");
 const { Product } = require("../models/product");
@@ -15,6 +15,7 @@ const range = require("express-range");
 const multer = require("multer");
 const upload = require("../middleware/fileUpload");
 const _ = require("lodash");
+const bcrypt = require("bcrypt");
 
 var storage = multer.diskStorage({
   destination: function (req, file, callback) {
@@ -128,6 +129,66 @@ router.post("/", [auth, upload], async (req, res) => {
     owner: user,
     segment: segment,
     phone: req.body.phone,
+    isApproved: req.body.isApproved,
+    publishDate: moment().toJSON(),
+    logo:
+      req.protocol +
+      "://" +
+      req.headers.host +
+      "/public/uploads/" +
+      _file.filename,
+  });
+  await shop.save();
+
+  res.send(shop);
+});
+
+router.post("/register", [upload], async (req, res) => {
+  const { error } = userValidate(
+    _.pick(req.body, "firstname", "lastname", "email", "phone", "password")
+  );
+  if (error) return res.status(400).send(error.details[0].message);
+  const { shoperror } = shopValidate(
+    req.body,
+    "shopname",
+    "commercialID",
+    "address",
+    "file",
+    "phone",
+    "segment"
+  );
+  if (shoperror) return res.status(400).send(shoperror.details[0].message);
+  let user = await User.findOne({ email: req.body.email });
+  if (user) return res.status(400).send("User already registered.");
+
+  user = new User(
+    _.pick(req.body, [
+      "firstname",
+      "lastname",
+      "address",
+      "shopname",
+      "commercialID",
+      "phone",
+      "role",
+      "email",
+      "password",
+    ])
+  );
+  const salt = await bcrypt.genSalt(10);
+  user.password = await bcrypt.hash(user.password, salt);
+  await user.save();
+
+  const segment = await Segment.findById(req.body.segment);
+  if (!segment) return res.status(400).send("Invalid Segment.");
+  const _file = req.file;
+
+  const shop = new Shop({
+    ["shopname.en"]: req.body.shopname,
+    address: req.body.address,
+    commercialID: req.body.commercialID,
+    owner: user,
+    segment: segment,
+    phone: req.body.phone,
     publishDate: moment().toJSON(),
     filename:
       req.protocol +
@@ -173,9 +234,10 @@ router.put("/:id", [auth, mm], async (req, res) => {
           commercialID: req.body.commercialID,
           // owner: user,
           segment: segment,
+          isApproved: req.body.isApproved,
           phone: req.body.phone,
           publishDate: moment().toJSON(),
-          filename:
+          logo:
             req.protocol +
             "://" +
             req.headers.host +
@@ -206,11 +268,11 @@ router.put("/:id", [auth, mm], async (req, res) => {
           commercialID: req.body.commercialID,
           // owner: user,
           description: description,
-
+          isApproved: req.body.isApproved,
           segment: segment,
           phone: req.body.phone,
           publishDate: moment().toJSON(),
-          filename:
+          logo:
             req.protocol +
             "://" +
             req.headers.host +
@@ -236,7 +298,7 @@ router.put("/:id", [auth, mm], async (req, res) => {
         commercialID: req.body.commercialID,
         // owner: user,
         description: description,
-
+        isApproved: req.body.isApproved,
         segment: segment,
         phone: req.body.phone,
         publishDate: moment().toJSON(),
@@ -262,7 +324,7 @@ router.put("/:id", [auth, mm], async (req, res) => {
       shopname: shopname,
       address: req.body.address,
       description: description,
-
+      isApproved: req.body.isApproved,
       commercialID: req.body.commercialID,
       // owner: _.pick(user, "_id", "firstname", "lastname", "email"),
       segment: segment,

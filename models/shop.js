@@ -47,6 +47,12 @@ const shopSchema = new mongoose.Schema({
     minlength: 2,
     maxlength: 200,
   },
+  logo: {
+    type: String,
+    // required: true,
+    minlength: 2,
+    maxlength: 200,
+  },
   landingImage: {
     type: String,
     // required: true,
@@ -72,6 +78,10 @@ const shopSchema = new mongoose.Schema({
     type: Schema.Types.ObjectId,
     ref: "User",
   },
+  isApproved: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 shopSchema.pre("save", async function (next) {
@@ -89,7 +99,7 @@ shopSchema.pre("save", async function (next) {
 
 const Shop = mongoose.model("Shops", shopSchema);
 
-function validateShop(shop) {
+function validate(shop) {
   const schema = {
     shopname: Joi.string().min(2).max(50).required(),
     shopname_de: Joi.string().min(2).max(50).required(),
@@ -98,6 +108,7 @@ function validateShop(shop) {
     address: Joi.string().min(5).max(255).required(),
     commercialID: Joi.string().min(2).max(15).required(),
     phone: Joi.string().min(2).max(20).required(),
+    isApproved: Joi.boolean().required(),
     owner: Joi.objectId().required(),
     file: Joi.optional(),
     landingFile: Joi.optional(),
@@ -107,6 +118,20 @@ function validateShop(shop) {
   return Joi.validate(shop, schema);
 }
 
+function shopValidate(shop) {
+  const schema = {
+    shopname: Joi.string().min(2).max(50).required(),
+    address: Joi.string().min(5).max(255).required(),
+    commercialID: Joi.string().min(2).max(15).required(),
+    phone: Joi.string().min(2).max(20).required(),
+    file: Joi.optional(),
+    segment: Joi.objectId().required(),
+  };
+
+  return Joi.validate(shop, schema);
+}
+
 exports.Shop = Shop;
 exports.shopSchema = shopSchema;
-exports.validate = validateShop;
+exports.validate = validate;
+exports.shopValidate = shopValidate;

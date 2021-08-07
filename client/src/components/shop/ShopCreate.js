@@ -5,6 +5,7 @@ import {
   Input,
   MenuItem,
   Grid,
+  FormControlLabel,
 } from "@material-ui/core";
 import TextField from "@material-ui/core/TextField";
 import decodeJwt from "jwt-decode";
@@ -19,6 +20,7 @@ import { DropzoneArea } from "material-ui-dropzone";
 import MuiPhoneInput from "material-ui-phone-number";
 import { showNotification, useLocale } from "react-admin";
 import { API_URL } from "../../config";
+import Switch from "@material-ui/core/Switch";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -51,6 +53,7 @@ export default function ShopCreate(props) {
     shopname: "",
     shopname_de: "",
     address: "",
+    isApproved: true,
     commercialID: "",
     phone: "",
     owner: decodeJwt(localStorage.getItem("token"))._id,
@@ -76,7 +79,15 @@ export default function ShopCreate(props) {
   }, []);
 
   const handleChange = (prop) => (event) => {
-    setValues({ ...values, [prop]: event.target.value });
+    // setValues({ ...values, [prop]: event.target.value });
+    if (prop === "isApproved") {
+      setValues({
+        ...values,
+        [prop]: event.target.checked,
+      });
+    } else {
+      setValues({ ...values, [prop]: event.target.value });
+    }
   };
 
   const handleChangePhone = (value) => {
@@ -85,6 +96,7 @@ export default function ShopCreate(props) {
   const handleChangeCategory = (event) => {
     setValues({ ...values, ["category"]: event.target.value });
   };
+
   const handleSubmit = (event) => {
     const data = {
       firstname: values.firstname,
@@ -121,6 +133,7 @@ export default function ShopCreate(props) {
         formData.append("commercialID", values.commercialID);
         formData.append("owner", data._id);
         formData.append("phone", values.phone);
+        formData.append("isApproved", values.isApproved);
         formData.append("segment", values.category);
         formData.append("file", files[0]);
         fetch(API_URL + "/shops", {
@@ -128,9 +141,9 @@ export default function ShopCreate(props) {
           mimeType: "multipart/form-data",
           contentType: false,
           body: formData,
-          headers: {
-            "x-auth-token": localStorage.getItem("token"),
-          },
+          // headers: {
+          //   "x-auth-token": localStorage.getItem("token"),
+          // },
         })
           .then((res) => {
             if (res.ok) {
@@ -263,7 +276,22 @@ export default function ShopCreate(props) {
               onChange={handleChange("address")}
             />
           </FormControl>
-
+          {/* <FormGroup class="custom-control" className={classes.margin}> */}
+          <Grid item xs={6}>
+            <FormControlLabel
+              style={{ marginTop: "30px" }}
+              control={
+                <Switch
+                  size="small"
+                  color="primary"
+                  checked={values.isApproved}
+                  onChange={handleChange("isApproved")}
+                />
+              }
+              label="Is Shop Approved"
+            />
+          </Grid>
+          {/* </FormGroup> */}
           <FormControl fullWidth className={classes.margin}>
             <InputLabel htmlFor="commercialID">Commercial ID</InputLabel>
             <Input

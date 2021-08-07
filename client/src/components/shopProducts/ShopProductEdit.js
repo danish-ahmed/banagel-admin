@@ -56,6 +56,7 @@ export default function ShopProductEdit(props) {
     name_de: "",
     shop: "",
     price: 0,
+    currency: "",
     category: "",
     discount: "",
     VAT: 0,
@@ -109,6 +110,7 @@ export default function ShopProductEdit(props) {
           ["name"]: shopproduct.name.en,
           ["name_de"]: shopproduct.name.de,
           ["price"]: shopproduct.actualPrice,
+          ["currency"]: shopproduct.currency,
           ["VAT"]: shopproduct.VAT ? shopproduct.VAT : 0,
           ["shop"]: shopproduct.shop._id,
           ["category"]: shopproduct.category._id,
@@ -233,6 +235,7 @@ export default function ShopProductEdit(props) {
     formData.append("name", values.name);
     formData.append("name_de", values.name_de);
     formData.append("price", values.price);
+    formData.append("currency", values.currency);
     formData.append("unit", values.unit);
     formData.append("addToStock", values.addToStock);
     formData.append("VAT", parseInt(values.VAT));
@@ -453,6 +456,19 @@ export default function ShopProductEdit(props) {
                 </Grid>
               )}
               <Grid container spacing={2}>
+                <Grid item xs={6}>
+                  <FormControl fullWidth className={classes.margin}>
+                    <InputLabel htmlFor="currency">Currency</InputLabel>
+                    <Input
+                      id="currency"
+                      name="currency"
+                      value={values.currency}
+                      type="text"
+                      disabled={true}
+                      onChange={handleChange("currency")}
+                    />
+                  </FormControl>
+                </Grid>
                 <Grid item xs={6}>
                   <FormControl className={classes.margin}>
                     <TagsCreate

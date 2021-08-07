@@ -1,8 +1,13 @@
-const { ShopProduct, validate } = require("../models/shopProduct");
+const {
+  ShopProduct,
+  validate,
+  validateReview,
+} = require("../models/shopProduct");
 const { Product } = require("../models/product");
 const { Shop } = require("../models/shop");
 const { SubCategory } = require("../models/subcategory");
 const auth = require("../middleware/auth");
+const customer = require("../middleware/customer");
 const admin = require("../middleware/admin");
 const validateObjectId = require("../middleware/validateObjectId");
 const moment = require("moment");
@@ -35,6 +40,34 @@ router.get("/all", [auth], async (req, res) => {
   //Pagination
 
   res.send(shopproducts);
+});
+
+router.get("/all-public", async (req, res) => {
+  const shopproducts = setDiscountPrice(
+    await ShopProduct.find().select("-__v").sort("name")
+  );
+
+  return res.send(shopproducts);
+});
+router.get("/category/:id", [validateObjectId], async (req, res) => {
+  const category = await Category.findById(req.params.id);
+  if (!category)
+    return res
+      .status(404)
+      .send("The Category with the given ID was not found.");
+  const shopproducts = setDiscountPrice(
+    await ShopProduct.find({ "category._id": req.params.id })
+      .select("-__v")
+      .sort("name")
+  );
+
+  return res.send(shopproducts);
+});
+router.get("/best-price", async (req, res) => {
+  const shopproducts = setDiscountPrice(
+    await ShopProduct.find({ hasDiscount: true }).select("-__v")
+  );
+  return res.send(shopproducts);
 });
 router.get("/", [auth], async (req, res) => {
   //All Products for admin
@@ -85,6 +118,22 @@ router.get("/:id", validateObjectId, async (req, res) => {
 
   res.send(product);
 });
+
+router.get("/related/:id", validateObjectId, async (req, res) => {
+  const product = await ShopProduct.findById(req.params.id).select("-__v");
+
+  if (!product)
+    return res.status(404).send("The product with the given ID was not found.");
+
+  const relatedProducts = await ShopProduct.find({
+    category: product.category,
+  });
+
+  const stats = product.reviews.map((r) => r.ratting);
+  const avg = (stats.reduce((a, b) => a + b, 0) / stats.length).toFixed(2);
+  res.send({ product, relatedProducts, avg });
+});
+
 router.post("/", [upload], async (req, res) => {
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
@@ -136,6 +185,7 @@ router.post("/", [upload], async (req, res) => {
     product: product,
     category: product.category,
     price: dis_date.price,
+    currency: req.body.currenct,
     actualPrice: dis_date.actualPrice,
     VAT: req.body.VAT,
     discount: req.body.discount,
@@ -151,19 +201,51 @@ router.post("/", [upload], async (req, res) => {
 
   res.send(shopproduct);
 });
+router.put(
+  "/add-review/:id",
+  [upload, customer],
+  validateObjectId,
+  async (req, res) => {
+    const { error } = validateReview(req.body);
+    if (error) return res.status(400).send(error.details[0].message);
 
+    // const product = await ShopProduct.findById(req.params.id).select("-__v");
+    // if (!product)
+    //   return res.status(404).send("The product with the given ID was not found.");
+    const p = await ShopProduct.findById(req.params.id);
+
+    const is_already_reviewed = p.reviews.filter(
+      (r) => r.customer === req.customer.id
+    );
+    if (is_already_reviewed.length > 0)
+      return res.status(400).send("You have already reviewed!");
+    const review = {
+      title: req.body.title,
+      comment: req.body.comment,
+      ratting: req.body.ratting,
+      customer: req.customer._id,
+    };
+    const product = await ShopProduct.findByIdAndUpdate(
+      req.params.id,
+      {
+        $push: { reviews: review },
+      },
+      { new: true }
+    );
+    res.send({ product });
+  }
+);
 router.put("/:id", [upload, validateObjectId], async (req, res) => {
-  console.log("VAT -----", req.body.VAT);
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
-  // const subcategory = await SubCategory.findById(req.body.category);
-  // if (!subcategory) return res.status(400).send("Invalid Category.");
 
   const shop = await Shop.findById(req.body.shop);
   if (!shop) return res.status(400).send("Invalid Shop.");
 
   const product = await Product.findById(req.body.product);
   if (!product) return res.status(400).send("Invalid Product.");
+
+  const prevshopproduct = await ShopProduct.findById(req.params.id);
   let _file = "";
   if (req.file) {
     _file =
@@ -174,7 +256,7 @@ router.put("/:id", [upload, validateObjectId], async (req, res) => {
       req.file.filename;
   }
   if (!_file) {
-    _file = product.image;
+    _file = prevshopproduct.image;
   }
   let dis_date = {};
   if (req.body.hasDiscount === false) {
@@ -211,10 +293,11 @@ router.put("/:id", [upload, validateObjectId], async (req, res) => {
       product: product,
       // category: subcategory,
       price: dis_date.price,
+      currency: req.body.currency,
       actualPrice: dis_date.actualPrice,
       VAT: req.body.VAT,
       hasDiscount: req.body.hasDiscount,
-      tags: req.body.tags && JSON.parse(req.body.tags),
+      tags: req.body.tags ? JSON.parse(req.body.tags) : prevShopProduct.tags,
       discount: req.body.discount,
       discountStartDate: dis_date.discountStartDate,
       discountEndDate: dis_date.discountEndDate,
@@ -343,16 +426,23 @@ router.get("/segment-page/:id", [validateObjectId], async (req, res) => {
     .select("_id")
     .sort("name");
   var _shops = await ShopProduct.find()
-    .where({
-      ["category._id"]:
-        filters.subcategory && filters.subcategory.length > 0
-          ? await SubCategory.find({ _id: filters.subcategory }).select("_id")
-          : subcategorie_ids,
-      ["product._id"]:
-        filters.product && filters.product.length > 0
-          ? filters.product
-          : { $ne: null },
-    })
+    .where(
+      {
+        ["category._id"]:
+          filters.subcategory && filters.subcategory.length > 0
+            ? await SubCategory.find({ _id: filters.subcategory }).select("_id")
+            : subcategorie_ids,
+      },
+      {
+        ["product._id"]:
+          filters.product && filters.product.length > 0
+            ? filters.product
+            : { $ne: null },
+      },
+      {
+        isApproved: true,
+      }
+    )
     .select("shop._id");
   const shopids = await _shops.map((shop) => shop.shop._id);
   const shops = await Shop.find().where({ _id: shopids });

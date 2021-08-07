@@ -93,6 +93,11 @@ const Order = mongoose.model(
       type: Date,
       default: Date.now,
     },
+    status: {
+      type: String,
+      enum: ["placed", "dispatched", "fulfilled", "cancelled"],
+      default: "pending",
+    },
   })
 );
 

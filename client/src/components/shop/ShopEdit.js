@@ -5,10 +5,12 @@ import {
   InputLabel,
   Input,
   MenuItem,
+  FormControlLabel,
 } from "@material-ui/core";
 import TextField from "@material-ui/core/TextField";
 import decodeJwt from "jwt-decode";
 import GooglePlacesAutocomplete from "react-google-places-autocomplete";
+import Switch from "@material-ui/core/Switch";
 
 import { makeStyles } from "@material-ui/core/styles";
 import Card from "@material-ui/core/Card";
@@ -50,6 +52,7 @@ export default function ShopEdit(props) {
     commercialID: "",
     phone: "",
     owner: "",
+    isApproved: true,
     category: "",
   });
   const [endescription, setEnDescription] = React.useState();
@@ -90,6 +93,7 @@ export default function ShopEdit(props) {
           commercialID: shop.commercialID,
           filename: shop.filename,
           phone: shop.phone,
+          isApproved: shop.isApproved,
         });
         if (shop.description) {
           setEnDescription(shop.description.en);
@@ -105,7 +109,14 @@ export default function ShopEdit(props) {
   }, []);
 
   const handleChange = (prop) => (event) => {
-    setValues({ ...values, [prop]: event.target.value });
+    if (prop === "isApproved") {
+      setValues({
+        ...values,
+        [prop]: event.target.checked,
+      });
+    } else {
+      setValues({ ...values, [prop]: event.target.value });
+    }
   };
 
   const handleChangePhone = (value) => {
@@ -130,6 +141,7 @@ export default function ShopEdit(props) {
     formData.append("commercialID", values.commercialID);
     formData.append("owner", decodeJwt(localStorage.getItem("token"))._id);
     formData.append("phone", values.phone);
+    formData.append("isApproved", values.isApproved);
     formData.append("segment", values.category);
     formData.append("file", files[0]);
     formData.append("landingFile", landingFiles[0]);
@@ -225,6 +237,20 @@ export default function ShopEdit(props) {
               onChange={handleChange("commercialID")}
             />
           </FormControl>
+          <Grid item xs={6}>
+            <FormControlLabel
+              style={{ marginTop: "30px" }}
+              control={
+                <Switch
+                  size="small"
+                  color="primary"
+                  checked={values.isApproved}
+                  onChange={handleChange("isApproved")}
+                />
+              }
+              label="Is Shop Approved"
+            />
+          </Grid>
           <FormControl fullWidth className={classes.margin}>
             <MuiPhoneInput
               defaultCountry="de"
