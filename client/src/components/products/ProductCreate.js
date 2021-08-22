@@ -64,9 +64,10 @@ export default function ProductCreate(props) {
     setError(null);
     setValues({ ...values, [prop]: event.target.value });
   };
-  const handleChangeCategory = (event) => {
+  const handleChangeCategory = (event, val) => {
+    // console.log(values);
     setError(null);
-    setValues({ ...values, ["category"]: event.target.value });
+    setValues({ ...values, ["category"]: val._id });
   };
 
   const handleSubmit = (event) => {
@@ -198,7 +199,7 @@ export default function ProductCreate(props) {
                     )}
                     // defaultValue={props.initialVal}
                     // value={props.initialVal}
-                    onChange={props.handleSelect}
+                    onChange={handleChangeCategory}
                   />
                 </FormControl>
               </Grid>

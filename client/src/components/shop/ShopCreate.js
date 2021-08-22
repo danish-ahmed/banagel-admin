@@ -56,7 +56,7 @@ export default function ShopCreate(props) {
     isApproved: true,
     commercialID: "",
     phone: "",
-    owner: decodeJwt(localStorage.getItem("token"))._id,
+    // owner: decodeJwt(localStorage.getItem("token"))._id,
     category: "",
   });
   const [files, setFiles] = React.useState();
@@ -141,9 +141,9 @@ export default function ShopCreate(props) {
           mimeType: "multipart/form-data",
           contentType: false,
           body: formData,
-          // headers: {
-          //   "x-auth-token": localStorage.getItem("token"),
-          // },
+          headers: {
+            "x-auth-token": localStorage.getItem("token"),
+          },
         })
           .then((res) => {
             if (res.ok) {

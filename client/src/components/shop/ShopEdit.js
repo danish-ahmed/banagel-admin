@@ -219,7 +219,7 @@ export default function ShopEdit(props) {
             </Grid>
           </Grid>
           <FormControl fullWidth className={classes.margin}>
-            <GooglePlacesAutocomplete apiKey="AIzaSyDqy8WQoR_IXFw84iKm9zOGLXFZ47KVEt8" />
+            <GooglePlacesAutocomplete apiKey="AIzaSyD6rVMNTv-mSSSJXTUxY-L-AchaxolKijs" />
             <InputLabel htmlFor="address">Address</InputLabel>
             <Input
               id="address"

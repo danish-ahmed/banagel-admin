@@ -422,7 +422,7 @@ router.get("/segment-page/:id", [validateObjectId], async (req, res) => {
   );
 
   const subcategorie_ids = await SubCategory.find()
-    .where({ ["category.segment"]: segment })
+    .where({ ["category.segment._id"]: segment._id })
     .select("_id")
     .sort("name");
   var _shops = await ShopProduct.find()
@@ -432,8 +432,7 @@ router.get("/segment-page/:id", [validateObjectId], async (req, res) => {
           filters.subcategory && filters.subcategory.length > 0
             ? await SubCategory.find({ _id: filters.subcategory }).select("_id")
             : subcategorie_ids,
-      },
-      {
+
         ["product._id"]:
           filters.product && filters.product.length > 0
             ? filters.product

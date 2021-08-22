@@ -39,6 +39,9 @@ import OfferList from "./components/offers/OfferList";
 import OfferCreate from "./components/offers/OfferCreate";
 import OfferEdit from "./components/offers/OfferEdit";
 import OfferEditAdmin from "./components/offers/OfferAdminEdit";
+import BlogList from "./components/blog/BlogList";
+import BlogCreate from "./components/blog/BlogCreate";
+import BlogEdit from "./components/blog/BlogEdit";
 function App() {
   const [permission, setPermissions] = useState("");
   useEffect(() => {
@@ -114,6 +117,14 @@ function App() {
         list={OfferList}
         create={OfferCreate}
         edit={permission === "admin" ? OfferEditAdmin : OfferEdit}
+      />
+
+      <Resource
+        name="blogs"
+        label="Blogs"
+        list={BlogList}
+        create={BlogCreate}
+        edit={permission === "admin" ? BlogEdit : null}
       />
 
       <Resource
