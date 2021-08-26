@@ -85,7 +85,11 @@ const shopSchema = new mongoose.Schema({
 });
 
 shopSchema.pre("save", async function (next) {
+  // console.log(
+  //   "00000000000000000000000000000000------------------0000000000000000000"
+  // );
   const loc = await geocoder.geocode(this.address);
+  console.log(loc);
   this.location = {
     type: "Point",
     coordinates: [loc[0].longitude, loc[0].latitude],
@@ -94,7 +98,7 @@ shopSchema.pre("save", async function (next) {
 
   // Do not save address
   // this.address = undefined;
-  next();
+  // next();
 });
 
 const Shop = mongoose.model("Shops", shopSchema);

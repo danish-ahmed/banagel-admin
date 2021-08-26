@@ -24,6 +24,7 @@
     "concurrently": "^6.2.0",
     "config": "^1.29.4",
     "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "express-async-errors": "^2.1.0",
     "express-range": "^2.0.1",
@@ -40,6 +41,7 @@
     "node-geocoder": "^3.27.0",
     "nodemon": "^2.0.7",
     "ra-input-rich-text": "^3.17.0",
+    "twilio": "^3.67.0",
     "winston": "2.4.0"
   },
   "devDependencies": {

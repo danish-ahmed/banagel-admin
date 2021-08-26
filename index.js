@@ -3,6 +3,7 @@ const express = require("express");
 const range = require("express-range");
 const config = require("config");
 const mongooseIntl = require("mongoose-intl");
+require("dotenv").config();
 const mongoose = require("mongoose");
 mongoose.plugin(mongooseIntl, {
   languages: ["en", "de"],

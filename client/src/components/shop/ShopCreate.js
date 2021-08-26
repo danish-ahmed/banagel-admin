@@ -20,6 +20,7 @@ import { DropzoneArea } from "material-ui-dropzone";
 import MuiPhoneInput from "material-ui-phone-number";
 import { showNotification, useLocale } from "react-admin";
 import { API_URL } from "../../config";
+import GooglePlacesAutocomplete from "react-google-places-autocomplete";
 import Switch from "@material-ui/core/Switch";
 
 const useStyles = makeStyles((theme) => ({
@@ -52,13 +53,15 @@ export default function ShopCreate(props) {
     lastname: "",
     shopname: "",
     shopname_de: "",
-    address: "",
+    // address: "",
     isApproved: true,
     commercialID: "",
     phone: "",
     // owner: decodeJwt(localStorage.getItem("token"))._id,
     category: "",
   });
+  const [address, setAddress] = React.useState(null);
+
   const [files, setFiles] = React.useState();
   const [error, setError] = React.useState("");
 
@@ -129,7 +132,7 @@ export default function ShopCreate(props) {
         const formData = new FormData();
         formData.append("shopname", values.shopname);
         formData.append("shopname_de", values.shopname_de);
-        formData.append("address", values.address);
+        formData.append("address", address.label);
         formData.append("commercialID", values.commercialID);
         formData.append("owner", data._id);
         formData.append("phone", values.phone);
@@ -269,11 +272,20 @@ export default function ShopCreate(props) {
           </Grid>
           <FormControl fullWidth className={classes.margin}>
             <InputLabel htmlFor="address">Address</InputLabel>
-            <Input
+            {/* <Input
               id="address"
               name="address"
               value={values.address}
               onChange={handleChange("address")}
+            /> */}
+            <GooglePlacesAutocomplete
+              apiKey="AIzaSyDvPEBUVQ0TLzhHJpYoAEsiCHOi18KjL18"
+              selectProps={{
+                address,
+                onChange: setAddress,
+              }}
+              onChange={handleChange("address")}
+              value={values.address}
             />
           </FormControl>
           {/* <FormGroup class="custom-control" className={classes.margin}> */}

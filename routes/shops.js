@@ -16,6 +16,7 @@ const multer = require("multer");
 const upload = require("../middleware/fileUpload");
 const _ = require("lodash");
 const bcrypt = require("bcrypt");
+const geocoder = require("../startup/geocoder");
 
 var storage = multer.diskStorage({
   destination: function (req, file, callback) {
@@ -48,6 +49,35 @@ var mm = _upload.fields([
   },
 ]);
 
+router.get("/location", async (req, res) => {
+  const skip =
+    req.query.skip && /^\d+$/.test(req.query.skip) ? Number(req.query.skip) : 0;
+  const address = req.query.address;
+
+  const loc = await geocoder.geocode(address);
+  const cords = [loc[0].longitude, loc[0].latitude];
+  console.log(cords);
+  const shops = await Shop.find(
+    {
+      location: {
+        $near: {
+          $maxDistance: 1000,
+          $geometry: {
+            type: "Point",
+            coordinates: cords,
+          },
+        },
+      },
+    },
+    undefined,
+    { skip, limit: 2 }
+  ).find((error, results) => {
+    if (error) console.log(error);
+    console.log(JSON.stringify(results, 0, 2));
+  });
+
+  res.send({ shops, center: cords });
+});
 router.get("/:id", validateObjectId, async (req, res) => {
   const shop = await Shop.findById(req.params.id).select("-__v");
 
@@ -60,6 +90,7 @@ router.get("/all", async (req, res) => {
   const shops = await Shop.find().select("-__v").populate("owner").sort("name");
   res.send(shops);
 });
+
 router.get("/", [auth], async (req, res) => {
   // Members shops
   const filters = JSON.parse(req.query.filter);
@@ -221,8 +252,13 @@ router.put("/:id", [auth, mm], async (req, res) => {
     de: req.body.description_de,
   };
   const _file = req.files.file;
+  const loc = await geocoder.geocode(req.body.address);
   const _landingFile = req.files.landingFile;
-
+  const location = {
+    type: "Point",
+    coordinates: [loc[0].longitude, loc[0].latitude],
+    formattedAddress: loc[0].formattedAddress,
+  };
   if (_file) {
     if (_landingFile) {
       let shop = await Shop.findByIdAndUpdate(
@@ -231,6 +267,7 @@ router.put("/:id", [auth, mm], async (req, res) => {
           shopname: shopname,
           description: description,
           address: req.body.address,
+          location,
           commercialID: req.body.commercialID,
           // owner: user,
           segment: segment,
@@ -266,6 +303,7 @@ router.put("/:id", [auth, mm], async (req, res) => {
           shopname: shopname,
           address: req.body.address,
           commercialID: req.body.commercialID,
+          location,
           // owner: user,
           description: description,
           isApproved: req.body.isApproved,
@@ -295,6 +333,8 @@ router.put("/:id", [auth, mm], async (req, res) => {
       {
         shopname: shopname,
         address: req.body.address,
+        location,
+
         commercialID: req.body.commercialID,
         // owner: user,
         description: description,
@@ -318,11 +358,13 @@ router.put("/:id", [auth, mm], async (req, res) => {
 
     res.send(shop);
   }
+
   let shop = await Shop.findByIdAndUpdate(
     req.params.id,
     {
       shopname: shopname,
       address: req.body.address,
+      location: location,
       description: description,
       isApproved: req.body.isApproved,
       commercialID: req.body.commercialID,

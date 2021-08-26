@@ -11,7 +11,7 @@ const customerSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    required: true,
+    // required: true,
     minlength: 5,
     maxlength: 255,
     unique: true,

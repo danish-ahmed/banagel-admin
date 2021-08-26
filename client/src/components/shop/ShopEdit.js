@@ -10,6 +10,8 @@ import {
 import TextField from "@material-ui/core/TextField";
 import decodeJwt from "jwt-decode";
 import GooglePlacesAutocomplete from "react-google-places-autocomplete";
+import { geocodeByAddress } from "react-google-places-autocomplete";
+
 import Switch from "@material-ui/core/Switch";
 
 import { makeStyles } from "@material-ui/core/styles";
@@ -55,6 +57,7 @@ export default function ShopEdit(props) {
     isApproved: true,
     category: "",
   });
+  const [address, setAddress] = React.useState(null);
   const [endescription, setEnDescription] = React.useState();
   const [dedescription, setDeDescription] = React.useState();
   const [files, setFiles] = React.useState();
@@ -87,7 +90,8 @@ export default function ShopEdit(props) {
         setValues({
           shopname: shop.shopname.en,
           shopname_de: shop.shopname.de,
-          address: shop.address,
+          // address: shop.address,
+
           category: shop.segment._id,
           owner: shop.owner._id,
           commercialID: shop.commercialID,
@@ -137,7 +141,7 @@ export default function ShopEdit(props) {
     const formData = new FormData();
     formData.append("shopname", values.shopname);
     formData.append("shopname_de", values.shopname_de);
-    formData.append("address", values.address);
+    formData.append("address", address.label);
     formData.append("commercialID", values.commercialID);
     formData.append("owner", decodeJwt(localStorage.getItem("token"))._id);
     formData.append("phone", values.phone);
@@ -219,14 +223,16 @@ export default function ShopEdit(props) {
             </Grid>
           </Grid>
           <FormControl fullWidth className={classes.margin}>
-            <GooglePlacesAutocomplete apiKey="AIzaSyD6rVMNTv-mSSSJXTUxY-L-AchaxolKijs" />
-            <InputLabel htmlFor="address">Address</InputLabel>
-            <Input
-              id="address"
-              name="address"
-              value={values.address}
+            <GooglePlacesAutocomplete
+              apiKey="AIzaSyDvPEBUVQ0TLzhHJpYoAEsiCHOi18KjL18"
+              selectProps={{
+                address,
+                onChange: setAddress,
+              }}
               onChange={handleChange("address")}
+              value={values.address}
             />
+            {/* <InputLabel htmlFor="address">Address</InputLabel> */}
           </FormControl>
           <FormControl fullWidth className={classes.margin}>
             <InputLabel htmlFor="address">Commercial ID</InputLabel>

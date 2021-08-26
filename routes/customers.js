@@ -28,108 +28,147 @@ router.post("/", auth, async (req, res) => {
 
   res.send(customer);
 });
-
 router.post("/register", [upload], async (req, res) => {
-  // const { error } = validate(req.body);
-  // if (error) return res.status(400).send(error.details[0].message);
-  // 2hHIFVqS5Knu5ovGmvPC04I87ngZxRUf
-  // var phone = req.body.phone;
+  var phone = "+" + req.body.code + req.body.phone;
   let is_customer = await Customer.findOne({
-    phone: req.body.code.concat(req.body.phone),
+    phone: phone,
   });
   if (is_customer) {
-    is_customer.email !== req.body.email &&
-      is_customer.set("email", req.body.email);
-    try {
-      const regUser = await authy.registerUser({
-        countryCode: req.body.code,
-        email: req.body.email,
-        phone: req.body.phone,
-      });
-      is_customer.set("authyId", regUser.user.id);
-      is_customer = await is_customer.save();
-      authy.requestSms(
-        { authyId: is_customer.authyId },
-        { force: true },
-        function (err, smsRes) {
-          if (err) {
-            console.log("ERROR requestSms", err);
-            res.status(500).json(err);
-            return;
-          }
-          console.log("requestSMS response: ", smsRes);
-          return res.status(200).json({ smsRes, customer: is_customer });
-        }
-      );
-    } catch (err) {
-      console.log("err" + err);
-      return res.status(500).send(err);
-    }
+    const code = Math.floor(100000 + Math.random() * 900000);
+    is_customer.authyId = code;
+    await is_customer.save();
+    const accountSid = process.env.TWILIO_ACCOUNT_SID;
+    const authToken = process.env.TWILIO_AUTH_TOKEN;
+    const client = require("twilio")(accountSid, authToken);
+    console.log("inside if");
+    client.messages
+      .create({
+        body: `Your OTP Code is ${code}`,
+        from: "+15152127592",
+        to: phone,
+      })
+      .then((message) => res.send(message))
+      .catch((err) => res.status(400).send("Something Failed"));
   } else {
-    //Create New Customer
-    try {
-      let customer = new Customer({
-        email: req.body.email,
-        phone: req.body.code.concat(req.body.phone),
-      });
-      try {
-        const regUser = await authy.registerUser({
-          countryCode: req.body.code,
-          email: req.body.email,
-          phone: req.body.phone,
-        });
-        customer.set("authyId", regUser.user.id);
-        customer = await customer.save();
-        authy.requestSms(
-          { authyId: customer.authyId },
-          { force: true },
-          function (err, smsRes) {
-            if (err) {
-              console.log("ERROR requestSms", err);
-              res.status(500).json(err);
-              return;
-            }
-            console.log("requestSMS response: ", smsRes);
-            return res.status(200).json({ smsRes, customer });
+    const code = Math.floor(100000 + Math.random() * 900000);
+    console.log("in else");
+    let customer = new Customer({ phone: phone, authyId: code });
+    customer = await customer.save();
 
-            // return res.status(200).json(smsRes);
-          }
-        );
-      } catch (err) {
-        console.log("err" + err);
-        return res.status(500).send(err);
-      }
-    } catch (err) {
-      console.log("err" + err);
-      return res.status(500).send(err);
-    }
+    const accountSid = process.env.TWILIO_ACCOUNT_SID;
+    const authToken = process.env.TWILIO_AUTH_TOKEN;
+    const client = require("twilio")(accountSid, authToken);
+    console.log(client);
+    client.messages
+      .create({
+        body: `Your OTP Code is ${code}`,
+        from: "+15152127592",
+        to: phone,
+      })
+      .then((message) =>
+        res.send("Your verification code is send on your number")
+      )
+      .catch((err) => res.status(400).send("Something Failed"));
   }
-  // console.log(req.body);
 });
+// router.post("/register", [upload], async (req, res) => {
+//   // const { error } = validate(req.body);
+//   // if (error) return res.status(400).send(error.details[0].message);
+//   // 2hHIFVqS5Knu5ovGmvPC04I87ngZxRUf
+//   // var phone = req.body.phone;
+//   let is_customer = await Customer.findOne({
+//     phone: req.body.code.concat(req.body.phone),
+//   });
+//   if (is_customer) {
+//     is_customer.email !== req.body.email &&
+//       is_customer.set("email", req.body.email);
+//     try {
+//       const regUser = await authy.registerUser({
+//         countryCode: req.body.code,
+//         email: req.body.email,
+//         phone: req.body.phone,
+//       });
+//       is_customer.set("authyId", regUser.user.id);
+//       is_customer = await is_customer.save();
+//       authy.requestSms(
+//         { authyId: is_customer.authyId },
+//         { force: true },
+//         function (err, smsRes) {
+//           if (err) {
+//             console.log("ERROR requestSms", err);
+//             res.status(500).json(err);
+//             return;
+//           }
+//           console.log("requestSMS response: ", smsRes);
+//           return res.status(200).json({ smsRes, customer: is_customer });
+//         }
+//       );
+//     } catch (err) {
+//       console.log("err" + err);
+//       return res.status(500).send(err);
+//     }
+//   } else {
+//     //Create New Customer
+//     try {
+//       let customer = new Customer({
+//         email: req.body.email,
+//         phone: req.body.code.concat(req.body.phone),
+//       });
+//       try {
+//         const regUser = await authy.registerUser({
+//           countryCode: req.body.code,
+//           email: req.body.email,
+//           phone: req.body.phone,
+//         });
+//         customer.set("authyId", regUser.user.id);
+//         customer = await customer.save();
+//         authy.requestSms(
+//           { authyId: customer.authyId },
+//           { force: true },
+//           function (err, smsRes) {
+//             if (err) {
+//               console.log("ERROR requestSms", err);
+//               res.status(500).json(err);
+//               return;
+//             }
+//             console.log("requestSMS response: ", smsRes);
+//             return res.status(200).json({ smsRes, customer });
+
+//             // return res.status(200).json(smsRes);
+//           }
+//         );
+//       } catch (err) {
+//         console.log("err" + err);
+//         return res.status(500).send(err);
+//       }
+//     } catch (err) {
+//       console.log("err" + err);
+//       return res.status(500).send(err);
+//     }
+//   }
+//   // console.log(req.body);
+// });
+
 router.post("/verify", [upload], async (req, res) => {
   console.log(req.body);
-  const customer = await Customer.findOne({ authyId: req.body.authyId });
-  await authy.verifyToken(
-    { authyId: customer.authyId, token: req.body.code },
-    async function (err, tokenRes) {
-      if (err) {
-        console.log("Verify Token Error: ", err);
-        res.status(500).json(err);
-        return;
-      }
-      console.log("Verify Token Response: ", tokenRes);
-      customer.set({ isVerified: true });
-      await customer.save();
-      const token = customer.generateAuthToken();
-      return res.json({
-        success: true,
-        message: "Enjoy your token!",
-        token: token,
-        customer: _.pick(customer, ["name", "email", "isVerified"]),
-      });
-      // res.status(200).json({ token: tokenRes, customer: customer });
-    }
-  );
+  const customer = await Customer.findOne({
+    authyId: req.body.code,
+    phone: req.body.phone,
+  });
+  if (customer) {
+    customer.set({ isVerified: true });
+    await customer.save();
+    const token = customer.generateAuthToken();
+    return res.json({
+      success: true,
+      message: "Enjoy your token!",
+      token: token,
+      customer: _.pick(customer, ["name", "email", "isVerified"]),
+    });
+  } else {
+    return res.status(400).send("Verification Failed");
+  }
+  // res.status(200).json({ token: tokenRes, customer: customer });
 });
 router.put("/:id", auth, async (req, res) => {
   const { error } = validate(req.body);
